@@ -8,23 +8,28 @@ import (
 )
 
 type PreviewReq struct {
-	TableName  string `json:"table_name,omitempty"`  //表名
-	StructName string `json:"struct_name,omitempty"` //实体名称
-	FileName   string `json:"file_name,omitempty"`   //文件名称
-	Comment    string `json:"comment"`               //表注释
-	Module     string `json:"module,omitempty"`      //模块(具体为创建一级目录)
-	Fields     []struct {
-		FieldName    string `json:"field_name,omitempty"`    //字段名
-		FieldZhName  string `json:"field_zh_name,omitempty"` //字段中文名
-		FieldComment string `json:"field_comment,omitempty"` //字段备注
-		FieldType    string `json:"field_type,omitempty"`    //字段类型
-		FieldJson    string `json:"field_json,omitempty"`    //jsonTag
-		Require      bool   `json:"require,omitempty"`       //是否必填(编辑)
-		SearchType   string `json:"search_type,omitempty"`   //搜索条件(=,like,between)
-		IsKey        bool   `json:"is_key"`                  //是否主键
-		IsAuto       bool   `json:"is_auto"`                 //是否自增
-	} `json:"fields,omitempty"`
+	TableName  string         `json:"table_name,omitempty"`  //表名
+	StructName string         `json:"struct_name,omitempty"` //实体名称
+	FileName   string         `json:"file_name,omitempty"`   //文件名称
+	Comment    string         `json:"comment"`               //表注释
+	Module     string         `json:"module,omitempty"`      //模块(具体为创建一级目录)
+	Fields     []PreviewField `json:"fields,omitempty"`
 }
+
+type PreviewField struct {
+	FieldName    string `json:"field_name,omitempty"`    //字段名
+	FieldZhName  string `json:"field_zh_name,omitempty"` //字段中文名
+	FieldComment string `json:"field_comment,omitempty"` //字段备注
+	FieldType    string `json:"field_type,omitempty"`    //字段类型
+	FieldJson    string `json:"field_json,omitempty"`    //jsonTag
+	Show         bool   `json:"show"`                    //是否显示
+	Require      bool   `json:"require,omitempty"`       //是否必填(编辑)
+	SearchType   string `json:"search_type,omitempty"`   //搜索条件(=,like,between)
+	IsKey        bool   `json:"is_key"`                  //是否主键
+	IsAuto       bool   `json:"is_auto"`                 //是否自增
+}
+
+//{FieldName: util.PascalCase(column.ColumnName), FieldZhName: column.ColumnComment, FieldComment: column.ColumnName, FieldType: "", FieldJson: column.ColumnName, Require: false, SearchType: "", IsKey: column.IsKey, IsAuto: column.IsAuto}
 
 type TableMapper struct {
 	GoMod      string

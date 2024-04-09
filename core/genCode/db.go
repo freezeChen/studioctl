@@ -3,6 +3,7 @@ package genCode
 import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var query Query
@@ -14,7 +15,9 @@ type Query interface {
 
 func initDb(source string) *gorm.DB {
 
-	db, err := gorm.Open(mysql.Open(source), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(source), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		panic(err)
 	}
@@ -24,7 +27,8 @@ func NewQuery(source, dbType string) Query {
 	db := initDb(source)
 	switch dbType {
 	case "mysql":
-		return &MysqlQuery{db: db}
+		query = &MysqlQuery{db: db}
+		return query
 	default:
 		panic("unsupport " + dbType)
 	}

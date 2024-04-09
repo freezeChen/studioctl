@@ -8,6 +8,9 @@ dependencies:
   '@element-plus/icons-vue':
     specifier: ^2.3.1
     version: 2.3.1(vue@3.4.19)
+  '@highlightjs/vue-plugin':
+    specifier: ^2.1.2
+    version: 2.1.2(highlight.js@11.9.0)(vue@3.4.19)
   '@types/node':
     specifier: ^20.11.19
     version: 20.11.19
@@ -17,6 +20,9 @@ dependencies:
   element-plus:
     specifier: ^2.5.6
     version: 2.5.6(vue@3.4.19)
+  highlight.js:
+    specifier: ^11.9.0
+    version: 11.9.0
   path:
     specifier: ^0.12.7
     version: 0.12.7
@@ -311,6 +317,16 @@ packages:
 
   /@floating-ui/utils@0.2.1:
     resolution: {integrity: sha512-9TANp6GPoMtYzQdt54kfAyMmz1+osLlXdg2ENroU7zzrtflTLrrC/lgrIfaSe+Wu0b89GKccT7vxXA0MoAIO+Q==}
+    dev: false
+
+  /@highlightjs/vue-plugin@2.1.2(highlight.js@11.9.0)(vue@3.4.19):
+    resolution: {integrity: sha512-P7s9DLBGpBsbltk3ZKuYUu9lwDCEfpttjJ5ErI6Wco6GQWIsjcSCJzCoMHgXhRUNkFDtZo7ZgeF8M10POPbDLw==}
+    peerDependencies:
+      highlight.js: ^11.0.1
+      vue: ^3
+    dependencies:
+      highlight.js: 11.9.0
+      vue: 3.4.19(typescript@5.3.3)
     dev: false
 
   /@jridgewell/sourcemap-codec@1.4.15:
@@ -889,6 +905,11 @@ packages:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
     dev: true
+
+  /highlight.js@11.9.0:
+    resolution: {integrity: sha512-fJ7cW7fQGCYAkgv4CPfwFHrfd/cLS4Hau96JuJ+ZTOWhjnhoeN1ub1tFmALm/+lW5z4WCAuAV9bm05AP0mS6Gw==}
+    engines: {node: '>=12.0.0'}
+    dev: false
 
   /inherits@2.0.3:
     resolution: {integrity: sha512-x00IRNXNy63jwGkJmzPigoySHbaqpNuzKbBOmzK+g2OdZpQ9w+sxCN+VSB3ja7IAge2OP2qpfxTjeNcyjmW1uw==}

@@ -2,6 +2,7 @@ package genCode
 
 import (
 	"bytes"
+	"github.com/freezeChen/studioctl/core/util"
 	"github.com/urfave/cli"
 	"html/template"
 )
@@ -20,6 +21,28 @@ func CodeHandler(ctx *cli.Context) {
 	NewQuery(url, dbType)
 
 	NewServer(port)
+}
+
+func parseTableColumns(table string, columns []Column) PreviewReq {
+	var out PreviewReq
+	out.TableName = table
+	out.StructName = util.PascalCase(table)
+
+	for _, column := range columns {
+		out.Fields = append(out.Fields, PreviewField{
+			FieldName:    util.PascalCase(column.ColumnName),
+			FieldZhName:  column.ColumnComment,
+			FieldComment: column.ColumnComment,
+			FieldType:    util.SQLTypeToStructType(column.DataType),
+			FieldJson:    column.ColumnName,
+			Require:      false,
+			Show:         true,
+			SearchType:   "",
+			IsKey:        column.IsKey,
+			IsAuto:       column.IsAuto})
+	}
+
+	return out
 }
 
 func genModel(in PreviewReq) (string, error) {

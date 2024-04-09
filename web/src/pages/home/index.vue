@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-aside>
+    <el-aside width="15%">
       <el-space>
         studio-tool
       </el-space>

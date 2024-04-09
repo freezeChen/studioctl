@@ -2,14 +2,20 @@ package genCode
 
 import (
 	"github.com/freezeChen/studioctl/core/xresult"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func NewServer(port string) {
 	engine := gin.Default()
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+
+	engine.Use(cors.New(config))
+
 	engine.GET("gen/tables", tables)
 	engine.GET("gen/columns", tableColumns)
-	engine.GET("gen/preview", preview)
+	engine.POST("gen/preview", preview)
 
 	engine.Run(port)
 }
@@ -22,7 +28,11 @@ func tables(ctx *gin.Context) {
 func tableColumns(ctx *gin.Context) {
 	table := ctx.Query("table")
 	column, err := query.TableColumn(table)
-	xresult.OK(ctx, column, err)
+	if err != nil {
+		xresult.Err(ctx, err)
+		return
+	}
+	xresult.OK(ctx, parseTableColumns(table, column), err)
 }
 
 func preview(ctx *gin.Context) {

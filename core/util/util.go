@@ -1,34 +1,31 @@
 package util
 
-type Tag interface {
-	PrimaryKey() string
-	Auto() string
-	CreateTime() string
-	UpdateTime() string
-	Split() string
+import "strings"
+
+func PascalCase(snake string) string {
+	// 将snake_case字符串按下划线分割成多个部分
+	parts := strings.Split(snake, "_")
+	// 对于所有部分，将其转换为大写
+	for i := 0; i < len(parts); i++ {
+		parts[i] = strings.Title(parts[i])
+	}
+	// 将所有部分拼接起来
+	return strings.Join(parts, "")
 }
 
-func NewTag() Tag {
-	return XormTag{}
-}
-
-type XormTag struct {
-}
-
-func (XormTag) PrimaryKey() string {
-	return "pk"
-}
-func (XormTag) Auto() string {
-	return "autoincr"
-}
-
-func (XormTag) CreateTime() string {
-	return "Created"
-}
-func (XormTag) UpdateTime() string {
-	return "Updated"
-}
-
-func (XormTag) Split() string {
-	return " "
+func SQLTypeToStructType(sqlType string) string {
+	switch sqlType {
+	case "bigint":
+		return "int64"
+	case "int", "tinyint":
+		return "int32"
+	case "text", "varchar":
+		return "string"
+	case "decimal", "double", "float":
+		return "float64"
+	case "datetime", "timestamp":
+		return "jsontime.JsonTime"
+	default:
+		return ""
+	}
 }
