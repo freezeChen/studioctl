@@ -16,15 +16,14 @@ func ({{.StructName}}) TableName() string {
 `, "`", "`")
 
 var tpl_modelReq = fmt.Sprintf(`package request
-
 // {{.StructName}} {{.Comment}}
 type {{.StructName}}ListReq struct{
-{{range .Columns}}		{{.MapperName}}	{{.Type}}	%s{{.Tag}} json:"{{.Name}}"{{if gt (len .ZhName) 0}} comment:"{{.ZhName}}"{{end}}%s {{if gt (len .Comment) 0}}// {{.Comment}}{{end}}
-{{end}}	}
+{{range .Columns}}{{if eq .SearchType "between"}} Start{{.MapperName}}	{{.Type}}	%sjson:"start_{{.Name}}"%s{{printf "\n"}} End{{.MapperName}}	{{.Type}}	%sjson:"end_{{.Name}}"%s{{printf "\n"}}{{end}}{{if eq .SearchType "like" "="}} {{.MapperName}}	{{.Type}} %sjson:"{{.Name}}"%s{{printf "\n"}}{{end}}{{end}} NumberPage
+}
 
 
 
-`, "`", "`")
+`, "`", "`", "`", "`", "`", "`")
 
 var tpl_Repo = fmt.Sprintf(`package dao
 
@@ -94,6 +93,51 @@ func (repo *{{.StructName}}Repo) List(ctx context.Context,in request.{{.StructNa
 }
 
 
+
+
+`)
+
+var tpl_service = fmt.Sprintf(`package service
+import (
+ 	"context"
+	"{{.GoMod}}/model"
+	"{{.GoMod}}/internal/repo"
+)
+
+type {{.StructName}}Service struct {
+	{{.DownLatterStructName}}Repo *{{.StructName}}Repo
+}
+
+func New{{.StructName}}Service({{.DownLatterStructName}}Repo *{{.StructName}}Repo) *{{.StructName}}Service {
+	service := {{.StructName}}Service{}
+	service.{{.DownLatterStructName}}Repo = {{.StructName}}Repo
+	return service
+}
+
+// Create{{.StructName}} 创建{{.TableZhName}}
+func (svc *{{.StructName}}Service) Create{{.StructName}}(ctx context.Context, data *model.{{.StructName}}) error {
+	return svc.{{.DownLatterStructName}}Repo.Create{{.StructName}}(ctx, data)
+}
+
+func (svc *{{.StructName}}Service) Find{{.StructName}}(ctx context.Context, id {{.PrimaryKeyType}}) (*model.{{.StructName}}, error) {
+	return svc.{{.DownLatterStructName}}Repo.FindOne(ctx, id)
+}
+
+func (svc *{{.StructName}}Service) Update{{.StructName}}(ctx context.Context, data *model.{{.StructName}}) error {
+	return svc.{{.DownLatterStructName}}Repo.Update(ctx, data)
+}
+
+func (svc *{{.StructName}}Service) Delete{{.StructName}}(ctx context.Context, id {{.PrimaryKeyType}}) error {
+	return svc.{{.DownLatterStructName}}Repo.Delete(ctx, id)
+}
+
+func (svc *{{.StructName}}Service) {{.StructName}}List(ctx context.Context,in request.{{.StructName}}Req) (*response.CountListResponse, error) {
+	list,count,err:= svc.{{.DownLatterStructName}}Repo.List(ctx, in)
+	if err != nil {
+		return nil,err
+	}
+	return &response.CountListResponse{Count: count, List: list},nil
+}
 
 
 `)

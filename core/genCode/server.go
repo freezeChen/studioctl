@@ -43,20 +43,26 @@ func preview(ctx *gin.Context) {
 	}
 
 	tableMapper := getTableMapper(param)
-	model, err := genModel(tableMapper)
-	if err != nil {
+	code, err := genCode(tableMapper)
+	xresult.OK(ctx, code, err)
+}
+
+func download(ctx *gin.Context) {
+	var param PreviewReq
+	if err := ctx.ShouldBind(&param); err != nil {
 		xresult.Err(ctx, err)
 		return
 	}
-	repo, err := genRepo(tableMapper)
+
+	tableMapper := getTableMapper(param)
+	code, err := genCode(tableMapper)
 	if err != nil {
 		xresult.Err(ctx, err)
 		return
 	}
 
-	xresult.OK(ctx, gin.H{
-		param.StructName + ".go":     model,
-		param.StructName + "Repo.go": repo,
-	}, err)
+	for name, content := range code {
+
+	}
 
 }

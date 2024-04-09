@@ -29,3 +29,11 @@ func SQLTypeToStructType(sqlType string) string {
 		return ""
 	}
 }
+
+func FirstLower(s string) string {
+	if s == "" {
+		return ""
+	}
+	return strings.ToLower(s[0:1]) + s[1:]
+
+}
