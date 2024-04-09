@@ -6,7 +6,6 @@ export interface TableRes {
 }
 
 
-
 export interface Preview {
     table_name: string; //表名
     struct_name: string; //实体名称
@@ -30,6 +29,10 @@ export interface PreviewField {
     is_auto: boolean;
 }
 
+export interface PreviewRes {
+    Value: Map<string, string>;
+}
+
 
 export async function getTables(): Promise<TableRes[]> {
     return axiosInstance.get("gen/tables");
@@ -43,6 +46,6 @@ export async function getTableColumns(
     });
 }
 
-export async function previewCode(params:Preview): Promise<string> {
-    return axiosInstance.post("gen/preview",params)
+export async function previewCode(params: Preview): Promise<Map<string, string>> {
+    return axiosInstance.post("gen/preview", params)
 }

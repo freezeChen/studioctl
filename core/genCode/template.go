@@ -15,11 +15,22 @@ func ({{.StructName}}) TableName() string {
 }
 `, "`", "`")
 
-var tpl_dao = fmt.Sprintf(`package dao
+var tpl_modelReq = fmt.Sprintf(`package request
+
+// {{.StructName}} {{.Comment}}
+type {{.StructName}}ListReq struct{
+{{range .Columns}}		{{.MapperName}}	{{.Type}}	%s{{.Tag}} json:"{{.Name}}"{{if gt (len .ZhName) 0}} comment:"{{.ZhName}}"{{end}}%s {{if gt (len .Comment) 0}}// {{.Comment}}{{end}}
+{{end}}	}
+
+
+
+`, "`", "`")
+
+var tpl_Repo = fmt.Sprintf(`package dao
 
 import (
  	"context"
-	"{{.Module}}/model"
+	"{{.GoMod}}/model"
 )
 
 type {{.StructName}}Repo struct {
@@ -32,7 +43,7 @@ func New{{.StructName}}Repo(data *Data) *{{.StructName}}Repo {
 	return &repo
 }
 
-// Insert 创建{{.StructName}}
+// Create{{.StructName}} 创建{{.TableZhName}}
 func (repo *{{.StructName}}Repo) Create{{.StructName}}(ctx context.Context, data *model.{{.StructName}}) error {
 	affect, err := repo.data.db.Context(ctx).Insert(data)
 	if err != nil {
@@ -57,7 +68,7 @@ func (repo *{{.StructName}}Repo) FindOne(ctx context.Context, id {{.PrimaryKeyTy
 }
 
 func (repo *{{.StructName}}Repo) Update(ctx context.Context, data *model.{{.StructName}}) error {
-	_, err := repo.data.db.Context(ctx).ID(data.{{.PkName}}).Update(data)
+	_, err := repo.data.db.Context(ctx).ID(data.{{.PrimaryKeyName}}).Update(data)
 	if err != nil {
 		return err
 	}
@@ -65,7 +76,7 @@ func (repo *{{.StructName}}Repo) Update(ctx context.Context, data *model.{{.Stru
 	return nil
 }
 
-func (repo *{{.StructName}}Repo) Delete(ctx context.Context, id {{.PkType}}) error {
+func (repo *{{.StructName}}Repo) Delete(ctx context.Context, id {{.PrimaryKeyType}}) error {
 	affect, err := repo.data.db.Context(ctx).ID(id).Delete(model.{{.StructName}}{})
 	if err != nil {
 		return err
@@ -76,7 +87,7 @@ func (repo *{{.StructName}}Repo) Delete(ctx context.Context, id {{.PkType}}) err
 	return nil
 }
 
-func (repo *{{.StructName}}Repo) List(ctx context.Context,in request.{{.StructName}}Search) (list []*model.{{.StructName}}, err error) {
+func (repo *{{.StructName}}Repo) List(ctx context.Context,in request.{{.StructName}}Req) (list []*model.{{.StructName}}, err error) {
 	list = make([]*model.{{.StructName}}, 0)
 	err = repo.data.db.Context(ctx).Limit(in.Limit()).Find(&list)
 	return

@@ -12,7 +12,7 @@ const tablesRef = ref<TableRes[]>()
 const selectTableRef = ref('')
 const columnsRef = ref<Preview>()
 const showCodeRef = ref(false)
-const previewCodeRef = ref('')
+const previewCodeRef = ref<Map<string, string>>()
 
 
 async function initData() {
@@ -80,7 +80,7 @@ async function preview() {
         <el-input type="text" v-model="scope.row.field_comment"/>
       </template>
     </el-table-column>
-    <el-table-column prop="field_json" label="数据库字段" min-width="120" >
+    <el-table-column prop="field_json" label="数据库字段" min-width="120">
       <template #default="scope">
         <el-input type="text" v-model="scope.row.field_json"/>
       </template>
@@ -107,7 +107,13 @@ async function preview() {
   </el-table>
 
   <el-dialog v-model="showCodeRef">
-    <hljsVuePlugin.component :code="previewCodeRef"/>
+    <el-tabs type="border-card">
+      <el-tab-pane v-for="(v,k) in previewCodeRef" :label="k">
+        <hljsVuePlugin.component :code="v"/>
+      </el-tab-pane>
+
+    </el-tabs>
+
 
   </el-dialog>
   <el-button @click="preview">预览</el-button>

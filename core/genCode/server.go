@@ -42,8 +42,21 @@ func preview(ctx *gin.Context) {
 		return
 	}
 
-	model, err := genModel(param)
+	tableMapper := getTableMapper(param)
+	model, err := genModel(tableMapper)
+	if err != nil {
+		xresult.Err(ctx, err)
+		return
+	}
+	repo, err := genRepo(tableMapper)
+	if err != nil {
+		xresult.Err(ctx, err)
+		return
+	}
 
-	xresult.OK(ctx, model, err)
+	xresult.OK(ctx, gin.H{
+		param.StructName + ".go":     model,
+		param.StructName + "Repo.go": repo,
+	}, err)
 
 }

@@ -32,11 +32,14 @@ type PreviewField struct {
 //{FieldName: util.PascalCase(column.ColumnName), FieldZhName: column.ColumnComment, FieldComment: column.ColumnName, FieldType: "", FieldJson: column.ColumnName, Require: false, SearchType: "", IsKey: column.IsKey, IsAuto: column.IsAuto}
 
 type TableMapper struct {
-	GoMod      string
-	TableName  string
-	StructName string
-	Comment    string
-	Columns    []ColumnMapper
+	GoMod          string
+	TableName      string
+	StructName     string
+	TableZhName    string
+	Comment        string
+	PrimaryKeyType string //主键类型
+	PrimaryKeyName string //主键名称
+	Columns        []ColumnMapper
 }
 
 type ColumnMapper struct {

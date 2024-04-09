@@ -45,7 +45,7 @@ func parseTableColumns(table string, columns []Column) PreviewReq {
 	return out
 }
 
-func genModel(in PreviewReq) (string, error) {
+func getTableMapper(in PreviewReq) TableMapper {
 	var tableMapper = TableMapper{
 		GoMod:      "",
 		TableName:  in.TableName,
@@ -63,13 +63,29 @@ func genModel(in PreviewReq) (string, error) {
 			IsKey:      field.IsKey,
 		}
 		column.Tag = column.ColumnTag()
+		if field.IsKey {
+			tableMapper.PrimaryKeyType = field.FieldType
+		}
 
 		tableMapper.Columns = append(tableMapper.Columns, column)
 	}
 
+	return tableMapper
+}
+
+func genModel(in TableMapper) (string, error) {
+
 	parse, _ := template.New("genModel").Parse(tpl_model)
 	var b = bytes.Buffer{}
 
-	parse.Execute(&b, tableMapper)
+	parse.Execute(&b, in)
+	return b.String(), nil
+}
+
+func genRepo(in TableMapper) (string, error) {
+	parse, _ := template.New("genRepo").Parse(tpl_Repo)
+	var b = bytes.Buffer{}
+
+	parse.Execute(&b, in)
 	return b.String(), nil
 }
