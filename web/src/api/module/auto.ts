@@ -30,7 +30,15 @@ export interface PreviewField {
 }
 
 export interface PreviewRes {
-    Value: Map<string, string>;
+    prefix_path: string; //路径前缀
+    pkg_package: string;
+    codes: Array<CodeItem>;
+}
+
+export interface CodeItem {
+    file_name: string;
+    path: string;
+    code: string;
 }
 
 
@@ -46,6 +54,10 @@ export async function getTableColumns(
     });
 }
 
-export async function previewCode(params: Preview): Promise<Map<string, string>> {
+export async function previewCode(params: Preview): Promise<PreviewRes> {
     return axiosInstance.post("gen/preview", params)
+}
+
+export async function downloadCode(params: Preview): Promise<any> {
+    return axiosInstance.post("gen/download", params)
 }

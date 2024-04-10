@@ -80,3 +80,15 @@ type Column struct {
 	IsKey         bool   `json:"is_key"`  //是否主键
 	IsAuto        bool   `json:"is_auto"` //是否自增
 }
+
+type CodeInfo struct {
+	PrefixPath string     `json:"prefix_path"` //路径前缀
+	PkgPackage string     `json:"pkg_package"` //自定义包路径
+	Codes      []CodeItem `json:"codes"`
+}
+
+type CodeItem struct {
+	FileName string `json:"file_name"` //文件名称
+	Path     string `json:"path"`      //保存路径
+	Code     string `json:"code"`      //代码
+}

@@ -1,9 +1,12 @@
 package genCode
 
 import (
+	"fmt"
 	"github.com/freezeChen/studioctl/core/xresult"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"os"
+	"path"
 )
 
 func NewServer(port string) {
@@ -16,6 +19,7 @@ func NewServer(port string) {
 	engine.GET("gen/tables", tables)
 	engine.GET("gen/columns", tableColumns)
 	engine.POST("gen/preview", preview)
+	engine.POST("gen/download", download)
 
 	engine.Run(port)
 }
@@ -61,8 +65,17 @@ func download(ctx *gin.Context) {
 		return
 	}
 
-	for name, content := range code {
+	for _, v := range code.Codes {
+		fmt.Println(path.Join(".", v.Path, v.FileName))
+		os.MkdirAll(path.Join(".", v.Path), os.ModePerm)
+		file, err := os.Create(path.Join(".", v.Path, v.FileName))
+		if err != nil {
 
+		}
+		file.WriteString(v.Code)
+		file.Close()
 	}
+
+	xresult.OK(ctx, nil, nil)
 
 }

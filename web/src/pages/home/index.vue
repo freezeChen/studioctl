@@ -19,7 +19,11 @@
       </el-menu>
     </el-aside>
     <el-main>
-      <router-view/>
+      <router-view v-slot="{Component}">
+        <keep-alive>
+          <component :is="Component"></component>
+        </keep-alive>
+      </router-view>
     </el-main>
   </el-container>
 

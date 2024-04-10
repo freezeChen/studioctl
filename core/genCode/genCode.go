@@ -84,31 +84,52 @@ func getTableMapper(in PreviewReq) TableMapper {
 	return tableMapper
 }
 
-func genCode(in TableMapper) (map[string]string, error) {
+func genCode(in TableMapper) (*CodeInfo, error) {
+	var out = new(CodeInfo)
 	model, err := genModel(in)
 	if err != nil {
 		return nil, err
 	}
+
+	out.Codes = append(out.Codes, CodeItem{
+		FileName: in.StructName + ".go",
+		Path:     "model",
+		Code:     model,
+	})
+
 	req, err := genReq(in)
 	if err != nil {
 		return nil, err
 	}
 
+	out.Codes = append(out.Codes, CodeItem{
+		FileName: in.StructName + "Req.go",
+		Path:     "model/request",
+		Code:     req,
+	})
+
 	repo, err := genRepo(in)
 	if err != nil {
 		return nil, err
 	}
+
+	out.Codes = append(out.Codes, CodeItem{
+		FileName: in.StructName + "Repo.go",
+		Path:     "repo",
+		Code:     repo,
+	})
+
 	svc, err := genService(in)
 	if err != nil {
 		return nil, err
 	}
+	out.Codes = append(out.Codes, CodeItem{
+		FileName: in.StructName + "Service.go",
+		Path:     "service",
+		Code:     svc,
+	})
 
-	return map[string]string{
-		in.StructName + ".go":        model,
-		in.StructName + "Repo.go":    repo,
-		in.StructName + "Req.go":     req,
-		in.StructName + "Service.go": svc,
-	}, nil
+	return out, nil
 }
 
 func genModel(in TableMapper) (string, error) {

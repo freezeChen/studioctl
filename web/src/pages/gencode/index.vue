@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import {getTableColumns, getTables, Preview, previewCode, TableRes} from '@/api/module/auto';
+import {downloadCode, getTableColumns, getTables, Preview, previewCode, PreviewRes, TableRes} from '@/api/module/auto';
 import {ref} from 'vue';
 import 'highlight.js/styles/stackoverflow-light.css'
 import 'highlight.js/lib/common';
+
 import hljsVuePlugin from "@highlightjs/vue-plugin";
 
 
@@ -12,7 +13,7 @@ const tablesRef = ref<TableRes[]>()
 const selectTableRef = ref('')
 const columnsRef = ref<Preview>()
 const showCodeRef = ref(false)
-const previewCodeRef = ref<Map<string, string>>()
+const previewCodeRef = ref<PreviewRes>()
 
 
 async function initData() {
@@ -36,6 +37,10 @@ async function preview() {
   showCodeRef.value = !showCodeRef.value;
   previewCodeRef.value = code
 
+}
+
+async function download() {
+  await downloadCode(columnsRef.value!!)
 }
 
 </script>
@@ -108,8 +113,8 @@ async function preview() {
 
   <el-dialog v-model="showCodeRef">
     <el-tabs type="border-card">
-      <el-tab-pane v-for="(v,k) in previewCodeRef" :label="k">
-        <hljsVuePlugin.component :code="v"/>
+      <el-tab-pane v-for="(v,k) in previewCodeRef?.codes" :label="v.file_name">
+        <hljsVuePlugin.component :code="v.code"/>
       </el-tab-pane>
 
     </el-tabs>
@@ -117,6 +122,7 @@ async function preview() {
 
   </el-dialog>
   <el-button @click="preview">预览</el-button>
+  <el-button @click="download">下载</el-button>
 </template>
 
 <style scoped></style>
