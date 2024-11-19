@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="cmd" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="studioctl" />
+    <working_directory value="$PROJECT_DIR$" />
+    <parameters value="web --url=&quot;root:z93aGM@u$U@tcp(192.168.31.9:3306)/gva&quot; " />
+    <kind value="PACKAGE" />
+    <package value="github.com/freezeChen/studioctl/cmd" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/cmd/main.go" />
+    <method v="2" />
+  </configuration>
+</component>

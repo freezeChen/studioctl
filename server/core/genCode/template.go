@@ -93,7 +93,7 @@ func (repo *{{.StructName}}Repo) {{.StructName}}List(ctx context.Context,in {{.L
 		tx = tx.Where("{{.Name}} like ?","%%"+in.{{.MapperName}}+"%%")
 	}
 {{end}}{{if eq .SearchType "="}}
-	if {{.MapperName}} != "" {
+	if {{.MapperName}} != {{if eq .Type "string"}}""{{else}}0{{end}} {
 		tx = tx.Where("{{.Name}} = ?",in.{{.MapperName}})
 	}
 {{end}}{{end}}
