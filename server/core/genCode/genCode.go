@@ -6,6 +6,7 @@ import (
 	"github.com/freezeChen/studioctl/core/util"
 	"github.com/urfave/cli"
 	"html/template"
+	"path"
 )
 
 const (
@@ -31,10 +32,20 @@ func CodeHandler(ctx *cli.Context) {
 	NewServer(port)
 }
 
-func parseTableColumns(table string, columns []Column) PreviewReq {
-	var out PreviewReq
+func parseTableColumns(table string, columns []Column) (TableInfoRs, error) {
+	var out TableInfoRs
 	out.TableName = table
+	out.FileName = table
 	out.StructName = util.PascalCase(table)
+
+	tableInfo, err := query.GetTableInfo(table)
+	if err != nil {
+		return TableInfoRs{}, err
+	}
+	out.ChName = tableInfo.TableComment
+	if out.ChName == "" {
+		out.ChName = tableInfo.TableName
+	}
 
 	for _, column := range columns {
 		out.Fields = append(out.Fields, PreviewField{
@@ -50,17 +61,43 @@ func parseTableColumns(table string, columns []Column) PreviewReq {
 			IsAuto:       column.IsAuto})
 	}
 
-	return out
+	return out, nil
 }
 
 func getTableMapper(in PreviewReq) TableMapper {
 	var tableMapper = TableMapper{
-		GoMod:                c.GoMod,
+		GoMod:                in.PackagePrefix,
 		TableName:            in.TableName,
 		StructName:           in.StructName,
+		TableZhName:          in.ChName,
 		DownLatterStructName: util.FirstLower(in.StructName),
 		Comment:              in.Comment,
+		Module:               in.Module,
 	}
+	if tableMapper.Module != "" {
+		tableMapper.ModelPackage = path.Join("model", tableMapper.Module+"Model")
+		tableMapper.ServicePackage = path.Join("service", tableMapper.Module+"Service")
+		tableMapper.DaoPackage = path.Join("dao", tableMapper.Module+"Dao")
+		tableMapper.RequestPackage = path.Join(tableMapper.ModelPackage, tableMapper.Module+"Req")
+
+		tableMapper.ResponsePackage = path.Join(tableMapper.ModelPackage, tableMapper.Module+"Res")
+		tableMapper.RestPackage = path.Join(tableMapper.RouterPath, tableMapper.Module)
+
+		tableMapper.LastModelPackage = tableMapper.Module + "Model"
+		tableMapper.LastRequestPackage = tableMapper.Module + "Req"
+
+	} else {
+		tableMapper.ModelPackage = path.Join(tableMapper.GoMod, "model")
+		tableMapper.ServicePackage = path.Join(tableMapper.GoMod, "service")
+		tableMapper.DaoPackage = path.Join(tableMapper.GoMod, "dao")
+		tableMapper.RequestPackage = path.Join(tableMapper.ModelPackage, "req")
+		tableMapper.ResponsePackage = path.Join(tableMapper.ModelPackage, "res")
+		tableMapper.RestPackage = path.Join(tableMapper.GoMod, tableMapper.RouterPath)
+
+		tableMapper.LastModelPackage = "model"
+		tableMapper.LastRequestPackage = "req"
+	}
+
 	for _, field := range in.Fields {
 		column := ColumnMapper{
 			Name:       field.FieldJson,
@@ -76,6 +113,7 @@ func getTableMapper(in PreviewReq) TableMapper {
 		column.Tag = column.ColumnTag()
 		if field.IsKey {
 			tableMapper.PrimaryKeyType = field.FieldType
+			tableMapper.PrimaryKeyName = field.FieldName
 		}
 
 		tableMapper.Columns = append(tableMapper.Columns, column)
@@ -93,7 +131,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 
 	out.Codes = append(out.Codes, CodeItem{
 		FileName: in.StructName + ".go",
-		Path:     "model",
+		Path:     fmt.Sprintf("internal/%s", in.ModelPackage),
 		Code:     model,
 	})
 
@@ -104,7 +142,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 
 	out.Codes = append(out.Codes, CodeItem{
 		FileName: in.StructName + "Req.go",
-		Path:     "model/request",
+		Path:     fmt.Sprintf("internal/%s", in.RequestPackage),
 		Code:     req,
 	})
 
@@ -115,7 +153,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 
 	out.Codes = append(out.Codes, CodeItem{
 		FileName: in.StructName + "Repo.go",
-		Path:     "repo",
+		Path:     fmt.Sprintf("internal/%s", in.DaoPackage),
 		Code:     repo,
 	})
 
@@ -125,8 +163,18 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 	}
 	out.Codes = append(out.Codes, CodeItem{
 		FileName: in.StructName + "Service.go",
-		Path:     "service",
+		Path:     fmt.Sprintf("internal/%s", in.ServicePackage),
 		Code:     svc,
+	})
+
+	rest, err := genRest(in)
+	if err != nil {
+		return nil, err
+	}
+	out.Codes = append(out.Codes, CodeItem{
+		FileName: in.StructName + "Rest.go",
+		Path:     "http",
+		Code:     rest,
 	})
 
 	return out, nil
@@ -155,6 +203,17 @@ func genRepo(in TableMapper) (string, error) {
 
 func genService(in TableMapper) (string, error) {
 	parse, err := template.New("genSerivce").Parse(tpl_service)
+	if err != nil {
+		return "", err
+	}
+	var b = bytes.Buffer{}
+
+	parse.Execute(&b, in)
+	return b.String(), nil
+}
+
+func genRest(in TableMapper) (string, error) {
+	parse, err := template.New("genRest").Parse(tpl_api)
 	if err != nil {
 		return "", err
 	}

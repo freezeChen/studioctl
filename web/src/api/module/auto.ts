@@ -6,15 +6,27 @@ export interface TableRes {
 }
 
 
+export interface GenTableInfoRes {
+    table_name: string; //表名
+    struct_name: string; //实体名称
+    file_name: string; //文件名称
+    module: string;//模块(具体为创建一级目录)
+    comment: string; //表注释
+    ch_name: string;
+    fields: Array<PreviewField>;
+}
+
 export interface Preview {
     table_name: string; //表名
     struct_name: string; //实体名称
     file_name: string; //文件名称
     module: string;//模块(具体为创建一级目录)
     comment: string; //表注释
+    ch_name: string;
+    go_out_dir: string; //go代码输出路径
+    js_out_dir: string; //前端代码输出路径
+    package_prefix: string; //go 包前缀
     fields: Array<PreviewField>;
-
-
 }
 
 export interface PreviewField {
@@ -48,7 +60,7 @@ export async function getTables(): Promise<TableRes[]> {
 
 export async function getTableColumns(
     params: string
-): Promise<Preview> {
+): Promise<GenTableInfoRes> {
     return axiosInstance.get("gen/columns", {
         params: {table: params},
     });

@@ -31,7 +31,7 @@ func GetGoModuleName() (string, error) {
 			return "", err
 		}
 
-		module = filepath.Join(module, "internal")
+		module = path.Join(module, "internal")
 	} else if IsExist("../../go.mod") {
 		module, err = ModulePath("../../go.mod")
 		if err != nil {
@@ -45,4 +45,10 @@ func GetGoModuleName() (string, error) {
 
 	}
 	return module, err
+}
+
+//go import 路径拼接
+func appendImportPath(path1, path2 string) string {
+
+	return path.Join(path1, path2)
 }

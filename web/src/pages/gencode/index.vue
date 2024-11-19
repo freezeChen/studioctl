@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {downloadCode, getTableColumns, getTables, Preview, previewCode, PreviewRes, TableRes} from '@/api/module/auto';
-import {ref} from 'vue';
+import {reactive, ref} from 'vue';
 import 'highlight.js/styles/stackoverflow-light.css'
 import 'highlight.js/lib/common';
 
@@ -11,7 +11,17 @@ const searchOpt = ["=", "like", "between"]
 
 const tablesRef = ref<TableRes[]>()
 const selectTableRef = ref('')
-const columnsRef = ref<Preview>()
+const columnsRef = reactive<Preview>({
+  go_out_dir: "", js_out_dir: "", package_prefix: "",
+  table_name: '',
+  struct_name: '',
+  fields: [],
+  file_name: '',
+  comment: '',
+  module: '',
+  ch_name: ''
+
+})
 const showCodeRef = ref(false)
 const previewCodeRef = ref<PreviewRes>()
 
@@ -26,12 +36,22 @@ initData()
 
 async function loadTableColumns() {
   const tableColumns = await getTableColumns(selectTableRef.value)
-
-  columnsRef.value = tableColumns
+  columnsRef.table_name = tableColumns.table_name
+  columnsRef.fields = tableColumns.fields
+  columnsRef.module = tableColumns.module
+  columnsRef.struct_name = tableColumns.struct_name
+  columnsRef.file_name = tableColumns.file_name
+  columnsRef.comment = tableColumns.comment
+  columnsRef.ch_name = tableColumns.ch_name
 }
 
 async function preview() {
-  const code = await previewCode(columnsRef.value!!)
+
+  columnsRef.go_out_dir = localStorage.getItem(`go_target`)!!
+  columnsRef.package_prefix = localStorage.getItem(`package_prefix`)!!
+
+
+  const code = await previewCode(columnsRef)
 
   console.log(code)
   showCodeRef.value = !showCodeRef.value;
@@ -40,27 +60,58 @@ async function preview() {
 }
 
 async function download() {
-  await downloadCode(columnsRef.value!!)
+  await downloadCode(columnsRef)
 }
 
 </script>
 
 <template>
-  <el-form>
-    <el-form-item>
+
+  <el-form
+      label-position="left"
+      style="max-width: 600px;"
+  >
+    <el-form-item label="选择表">
       <el-select v-model="selectTableRef">
-        <el-option :key="v.table_name" :label="v.table_comment + v.table_name" :value="v.table_name"
+        <el-option :key="v.table_name" :label="v.table_comment+' ' + v.table_name" :value="v.table_name"
                    v-for="v in tablesRef"/>
       </el-select>
     </el-form-item>
   </el-form>
+
   <el-button @click="loadTableColumns">确定</el-button>
-  <el-form label-width="auto">
-    <el-form-item label-width="名称">
 
-    </el-form-item>
+  <el-card style="margin-top: 15px">
 
-  </el-form>
+    <el-form :inline="true" label-position="right" label-width="100px">
+      <el-form-item label="包名称">
+
+        <el-input v-model="columnsRef.module">
+          <template #suffix>
+            <el-tooltip>
+              <el-icon>
+                <QuestionFilled/>
+              </el-icon>
+              <template #content>
+                <span>go包模块位置,为空标识不分模块</span>
+              </template>
+            </el-tooltip>
+          </template>
+        </el-input>
+      </el-form-item>
+      <el-form-item label="文件名称">
+        <el-input v-model="columnsRef.file_name"/>
+      </el-form-item>
+      <el-form-item label="struct名称">
+        <el-input v-model="columnsRef.struct_name"/>
+      </el-form-item>
+      <el-form-item label="中文名称">
+        <el-input v-model="columnsRef.ch_name"/>
+      </el-form-item>
+    </el-form>
+  </el-card>
+  <el-divider/>
+
 
   <el-table :data="columnsRef?.fields" :border="true">
     <el-table-column prop="field_name" label="字段名称" width="140">

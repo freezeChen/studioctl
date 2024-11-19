@@ -1,23 +1,45 @@
-<script setup lang="ts">
-import {ref} from "vue";
-
-const settingRef = ref()
-
-
-</script>
-
 <template>
   <el-form :model="settingRef">
-    <el-form-item label="gomod">
-      <el-input/>
+    <el-form-item label="package前缀">
+      <el-input v-model="settingRef.package_prefix"/>
     </el-form-item>
     <el-form-item label="路径前缀">
-      <el-input/>
+      <el-input v-model="settingRef.target"/>
     </el-form-item>
 
   </el-form>
-
+  <el-button @click="load">加载</el-button>
+  <el-button @click="save">保存</el-button>
 </template>
+
+
+<script setup lang="ts">
+import {reactive} from "vue";
+import {loadGoInfo} from "@/api/module/setting";
+
+const settingRef = reactive({
+  target: '',
+  package_prefix: ''
+})
+
+init()
+
+async function load() {
+  settingRef.package_prefix = await loadGoInfo(settingRef.target)
+}
+
+function init() {
+  settingRef.target = localStorage.getItem("go_target")!!
+  settingRef.package_prefix = localStorage.getItem("package_prefix")!!
+}
+
+function save() {
+  localStorage.setItem("package_prefix", settingRef.package_prefix)
+  localStorage.setItem("go_target", settingRef.target)
+}
+
+</script>
+
 
 <style scoped>
 

@@ -1,19 +1,35 @@
 package genCode
 
 import (
+	"fmt"
 	"github.com/freezeChen/studioctl/core/util"
 	"html/template"
 	"slices"
 	"strings"
 )
 
-type PreviewReq struct {
+type TableInfoRs struct {
 	TableName  string         `json:"table_name,omitempty"`  //表名
 	StructName string         `json:"struct_name,omitempty"` //实体名称
 	FileName   string         `json:"file_name,omitempty"`   //文件名称
 	Comment    string         `json:"comment"`               //表注释
 	Module     string         `json:"module,omitempty"`      //模块(具体为创建一级目录)
+	ChName     string         `json:"ch_name"`               //中文名称(用于备注提示)
 	Fields     []PreviewField `json:"fields,omitempty"`
+}
+
+type PreviewReq struct {
+	TableName     string         `json:"table_name,omitempty"`  //表名
+	StructName    string         `json:"struct_name,omitempty"` //实体名称
+	FileName      string         `json:"file_name,omitempty"`   //文件名称
+	Comment       string         `json:"comment"`               //表注释
+	Module        string         `json:"module,omitempty"`      //模块(具体为创建一级目录)
+	ChName        string         `json:"ch_name"`               //中文名称(用于备注提示)
+	GoOutDir      string         `json:"go_out_dir"`            //go代码输出路径
+	JsOutDir      string         `json:"js_out_dir"`            //js代码输出路径
+	PackagePrefix string         `json:"package_prefix"`        //go包前缀
+	RouterPath    string         `json:"router_path"`           //路由包路径
+	Fields        []PreviewField `json:"fields,omitempty"`
 }
 
 type PreviewField struct {
@@ -30,15 +46,27 @@ type PreviewField struct {
 }
 
 type TableMapper struct {
-	GoMod                string
-	TableName            string
-	StructName           string
+	GoMod                string //go mod
+	TableName            string //表面
+	StructName           string //结构体名称
 	DownLatterStructName string
-	TableZhName          string
-	Comment              string
+	TableZhName          string //表中文名称
+	Comment              string //表注释
 	PrimaryKeyType       string //主键类型
 	PrimaryKeyName       string //主键名称
-	Columns              []ColumnMapper
+	Module               string //模块名称
+	RouterPath           string //路由包路径
+	//用于方便代码生成
+	ModelPackage       string
+	LastModelPackage   string
+	ServicePackage     string
+	RestPackage        string
+	DaoPackage         string
+	RequestPackage     string
+	LastRequestPackage string
+	ResponsePackage    string
+
+	Columns []ColumnMapper
 }
 
 type ColumnMapper struct {
@@ -55,16 +83,25 @@ type ColumnMapper struct {
 
 func (c ColumnMapper) ColumnTag() template.HTML {
 	var res []string
-	tag := util.NewTag()
+	tag := util.GormTag{}
 	if c.IsKey {
 		res = append(res, tag.PrimaryKey())
 	}
 	if c.IsAuto {
 		res = append(res, tag.Auto())
 	}
+	if c.Name == "created_at" {
+		res = append(res, tag.CreateTime())
+	}
+	if c.Name == "updated_at" {
+		res = append(res, tag.UpdateTime())
+	}
 
 	slices.Sort(res)
-	return template.HTML(strings.Join(res, tag.Split()))
+	if len(res) == 0 {
+		return template.HTML("")
+	}
+	return template.HTML(fmt.Sprintf(`%s:"%s"`, tag.TagName(), strings.Join(res, tag.Split())))
 }
 
 type Table struct {

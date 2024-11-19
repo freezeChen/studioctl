@@ -10,6 +10,7 @@ var query Query
 
 type Query interface {
 	Tables() ([]Table, error)
+	GetTableInfo(table string) (Table, error)
 	TableColumn(table string) ([]Column, error)
 }
 
@@ -45,6 +46,15 @@ func (m *MysqlQuery) Tables() ([]Table, error) {
 	err := m.db.Raw("select table_name as table_name,table_comment from information_schema.tables where table_schema = ?", m.db.Migrator().CurrentDatabase()).Scan(&result).Error
 	if err != nil {
 		return nil, err
+	}
+	return result, nil
+}
+
+func (m *MysqlQuery) GetTableInfo(table string) (Table, error) {
+	var result Table
+	err := m.db.Raw("select table_name as table_name,table_comment from information_schema.tables where table_schema = ? and table_name = ?", m.db.Migrator().CurrentDatabase(), table).Scan(&result).Error
+	if err != nil {
+		return Table{}, err
 	}
 	return result, nil
 }

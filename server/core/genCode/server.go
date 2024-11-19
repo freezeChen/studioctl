@@ -2,11 +2,13 @@ package genCode
 
 import (
 	"fmt"
+	"github.com/freezeChen/studioctl/core/util"
 	"github.com/freezeChen/studioctl/core/xresult"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"os"
 	"path"
+	"strings"
 )
 
 func NewServer(port string) {
@@ -21,8 +23,12 @@ func NewServer(port string) {
 	engine.POST("gen/preview", preview)
 	engine.POST("gen/download", download)
 
+	engine.GET("setting/loadGoInfo", loadTarget)
+
 	engine.Run(port)
 }
+
+//region 表信息
 
 func tables(ctx *gin.Context) {
 	tables, err := query.Tables()
@@ -31,12 +37,15 @@ func tables(ctx *gin.Context) {
 
 func tableColumns(ctx *gin.Context) {
 	table := ctx.Query("table")
+
 	column, err := query.TableColumn(table)
 	if err != nil {
 		xresult.Err(ctx, err)
 		return
 	}
-	xresult.OK(ctx, parseTableColumns(table, column), err)
+	out, err := parseTableColumns(table, column)
+
+	xresult.OK(ctx, out, err)
 }
 
 func preview(ctx *gin.Context) {
@@ -67,8 +76,8 @@ func download(ctx *gin.Context) {
 
 	for _, v := range code.Codes {
 		fmt.Println(path.Join(".", v.Path, v.FileName))
-		os.MkdirAll(path.Join(".", v.Path), os.ModePerm)
-		file, err := os.Create(path.Join(".", v.Path, v.FileName))
+		os.MkdirAll(param.GoOutDir+"/"+path.Join(".", v.Path), os.ModePerm)
+		file, err := os.Create(param.GoOutDir + "/" + path.Join(".", v.Path, v.FileName))
 		if err != nil {
 
 		}
@@ -79,3 +88,28 @@ func download(ctx *gin.Context) {
 	xresult.OK(ctx, nil, nil)
 
 }
+
+//endregion
+
+//region 设置
+
+func loadTarget(ctx *gin.Context) {
+	targetDir := ctx.Query("target")
+	workDir, _ := os.Getwd()
+	fmt.Println(workDir)
+	os.Chdir(targetDir)
+
+	workDir, _ = os.Getwd()
+	fmt.Println(workDir)
+
+	modulePath, err := util.GetGoModuleName()
+	if err != nil {
+		xresult.Err(ctx, err)
+		return
+	}
+	modulePath = strings.ReplaceAll(modulePath, "\\", "/")
+	xresult.OK(ctx, modulePath, err)
+
+}
+
+//endregion
