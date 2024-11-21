@@ -206,7 +206,7 @@ func (rest {{.StructName}}Rest) Router(route *gin.RouterGroup) {
 // @Produce application/json
 // @Param data body {{.LastModelPackage}}.{{.StructName}} true "创建{{.TableZhName}}"
 // @Success 200 {object} response.Response{msg=string} "创建成功"
-// @Router /{{.DownLatterStructName}}/create{{.StructName}} [post]
+// @Router	{{- if .Module}} /{{.Module}}{{- end}} /{{.DownLatterStructName}}/create{{.StructName}} [post]
 func (rest {{.StructName}}Rest) create{{.StructName}}(ctx *gin.Context) {
 	var param {{.LastModelPackage}}.{{.StructName}}
 	if err := ctx.ShouldBind(&param); err != nil {
@@ -225,7 +225,7 @@ func (rest {{.StructName}}Rest) create{{.StructName}}(ctx *gin.Context) {
 // @Produce application/json
 // @Param data body {{.LastModelPackage}}.{{.StructName}} true "修改{{.TableZhName}}"
 // @Success 200 {object} response.Response{msg=string} "修改成功"
-// @Router /{{.DownLatterStructName}}/update{{.StructName}} [put]
+// @Router	{{- if .Module}} /{{.Module}}{{- end}} /{{.DownLatterStructName}}/update{{.StructName}} [put]
 func (rest {{.StructName}}Rest) update{{.StructName}}(ctx *gin.Context) {
 	var param {{.LastModelPackage}}.{{.StructName}}
 	if err := ctx.ShouldBind(&param); err != nil {
@@ -244,7 +244,7 @@ func (rest {{.StructName}}Rest) update{{.StructName}}(ctx *gin.Context) {
 // @Produce application/json
 // @Param id query int  true "id"
 // @Success 200 {object} response.Response{msg=string} "修改成功"
-// @Router /{{.DownLatterStructName}}/update{{.StructName}} [put]
+// @Router{{- if .Module}} /{{.Module}}{{- end}} /{{.DownLatterStructName}}/update{{.StructName}} [put]
 func (rest {{.StructName}}Rest) delete{{.StructName}}(ctx *gin.Context) {
 	var param struct{
 	{{.PrimaryKeyName}} {{.PrimaryKeyType}}` + "`" + `binding:"required"` + "`" + `
@@ -265,7 +265,7 @@ func (rest {{.StructName}}Rest) delete{{.StructName}}(ctx *gin.Context) {
 // @Produce application/json
 // @Param ids query int  true "ids"
 // @Success 200 {object} response.Response{msg=string} "修改成功"
-// @Router /{{.DownLatterStructName}}/update{{.StructName}}ByIds [put]
+// @Router	{{- if .Module}} /{{.Module}}{{- end}} /{{.DownLatterStructName}}/update{{.StructName}}ByIds [put]
 func (rest {{.StructName}}Rest) delete{{.StructName}}ByIds(ctx *gin.Context) {
 	var param struct{
 	{{.PrimaryKeyName}}s []{{.PrimaryKeyType}} ` + "`" + `binding:"required"` + "`" + `
@@ -286,7 +286,7 @@ func (rest {{.StructName}}Rest) delete{{.StructName}}ByIds(ctx *gin.Context) {
 // @Produce application/json
 // @Param data body {{.LastRequestPackage}}.{{.StructName}}ListReq true "获取{{.TableZhName}}列表"
 // @Success 200 {object} response.Response{data={{.LastModelPackage}}.{{.StructName}}} 
-// @Router /{{.DownLatterStructName}}/get{{.StructName}}List [post]
+// @Router	{{- if .Module}} /{{.Module}}{{- end}} /{{.DownLatterStructName}}/get{{.StructName}}List [post]
 func (rest {{.StructName}}Rest) get{{.StructName}}List(ctx *gin.Context) {
 	var param {{.LastRequestPackage}}.{{.StructName}}ListReq
 	if err := ctx.ShouldBind(&param); err != nil {
@@ -300,3 +300,12 @@ func (rest {{.StructName}}Rest) get{{.StructName}}List(ctx *gin.Context) {
 
 
 `)
+
+var tpl_web_api = `
+
+
+`
+
+var tpl_web_form = ``
+
+var tpl_web_view = ``
