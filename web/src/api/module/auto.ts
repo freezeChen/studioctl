@@ -26,6 +26,7 @@ export interface Preview {
     go_out_dir: string; //go代码输出路径
     js_out_dir: string; //前端代码输出路径
     package_prefix: string; //go 包前缀
+    router_path:string;
     fields: Array<PreviewField>;
 }
 

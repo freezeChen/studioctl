@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"github.com/freezeChen/studioctl/core/util"
 	"github.com/urfave/cli"
-	"html/template"
+	template2 "html/template"
 	"path"
+	"text/template"
 )
 
 const (
@@ -81,21 +82,24 @@ func getTableMapper(in PreviewReq) TableMapper {
 		tableMapper.RequestPackage = path.Join(tableMapper.ModelPackage, tableMapper.Module+"Req")
 
 		tableMapper.ResponsePackage = path.Join(tableMapper.ModelPackage, tableMapper.Module+"Res")
-		tableMapper.RestPackage = path.Join(tableMapper.RouterPath, tableMapper.Module)
+		tableMapper.RestPackage = path.Join("interface", "http/web", tableMapper.RouterPath, tableMapper.Module)
 
 		tableMapper.LastModelPackage = tableMapper.Module + "Model"
 		tableMapper.LastRequestPackage = tableMapper.Module + "Req"
-
+		tableMapper.LastDaoPackage = tableMapper.Module + "Dao"
+		tableMapper.LastServicePackage = tableMapper.Module + "Service"
 	} else {
 		tableMapper.ModelPackage = path.Join(tableMapper.GoMod, "model")
 		tableMapper.ServicePackage = path.Join(tableMapper.GoMod, "service")
 		tableMapper.DaoPackage = path.Join(tableMapper.GoMod, "dao")
 		tableMapper.RequestPackage = path.Join(tableMapper.ModelPackage, "req")
 		tableMapper.ResponsePackage = path.Join(tableMapper.ModelPackage, "res")
-		tableMapper.RestPackage = path.Join(tableMapper.GoMod, tableMapper.RouterPath)
+		tableMapper.RestPackage = path.Join(tableMapper.GoMod, "interface", "http/web", tableMapper.RouterPath)
 
 		tableMapper.LastModelPackage = "model"
 		tableMapper.LastRequestPackage = "req"
+		tableMapper.LastDaoPackage = "dao"
+		tableMapper.LastServicePackage = "service"
 	}
 
 	for _, field := range in.Fields {
@@ -108,8 +112,16 @@ func getTableMapper(in PreviewReq) TableMapper {
 			IsAuto:     field.IsAuto,
 			SearchType: field.SearchType,
 			IsKey:      field.IsKey,
-			Tag:        template.HTML(fmt.Sprintf("`json:\"%s\"`", field.FieldJson)),
+			Tag:        template2.HTML(fmt.Sprintf("`json:\"%s\"`", field.FieldJson)),
 		}
+
+		if field.FieldType == "jsontime.JsonTime" {
+			if field.SearchType != "" {
+				tableMapper.ReqHasJsonTime = true
+			}
+			tableMapper.ModelHasJsonTime = true
+		}
+
 		column.Tag = column.ColumnTag()
 		if field.IsKey {
 			tableMapper.PrimaryKeyType = field.FieldType
@@ -173,7 +185,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 	}
 	out.Codes = append(out.Codes, CodeItem{
 		FileName: in.StructName + "Rest.go",
-		Path:     "http",
+		Path:     fmt.Sprintf("internal/%s", in.RestPackage),
 		Code:     rest,
 	})
 
@@ -195,6 +207,7 @@ func genReq(in TableMapper) (string, error) {
 }
 
 func genRepo(in TableMapper) (string, error) {
+	fmt.Println(tpl_Repo)
 	parse, _ := template.New("genRepo").Parse(tpl_Repo)
 	var b = bytes.Buffer{}
 	parse.Execute(&b, in)
@@ -202,6 +215,7 @@ func genRepo(in TableMapper) (string, error) {
 }
 
 func genService(in TableMapper) (string, error) {
+
 	parse, err := template.New("genSerivce").Parse(tpl_service)
 	if err != nil {
 		return "", err

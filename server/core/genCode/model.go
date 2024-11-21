@@ -57,11 +57,15 @@ type TableMapper struct {
 	Module               string //模块名称
 	RouterPath           string //路由包路径
 	//用于方便代码生成
+	ModelHasJsonTime   bool
+	ReqHasJsonTime     bool
 	ModelPackage       string
 	LastModelPackage   string
 	ServicePackage     string
+	LastServicePackage string
 	RestPackage        string
 	DaoPackage         string
+	LastDaoPackage     string
 	RequestPackage     string
 	LastRequestPackage string
 	ResponsePackage    string

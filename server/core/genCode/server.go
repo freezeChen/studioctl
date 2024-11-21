@@ -79,7 +79,7 @@ func download(ctx *gin.Context) {
 		os.MkdirAll(param.GoOutDir+"/"+path.Join(".", v.Path), os.ModePerm)
 		file, err := os.Create(param.GoOutDir + "/" + path.Join(".", v.Path, v.FileName))
 		if err != nil {
-
+			fmt.Println("文件生成失败", err.Error())
 		}
 		file.WriteString(v.Code)
 		file.Close()

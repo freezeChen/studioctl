@@ -1,70 +1,3 @@
-<script setup lang="ts">
-import {downloadCode, getTableColumns, getTables, Preview, previewCode, PreviewRes, TableRes} from '@/api/module/auto';
-import {reactive, ref} from 'vue';
-import 'highlight.js/styles/stackoverflow-light.css'
-import 'highlight.js/lib/common';
-
-import hljsVuePlugin from "@highlightjs/vue-plugin";
-
-
-const searchOpt = ["=", "like", "between"]
-
-const tablesRef = ref<TableRes[]>()
-const selectTableRef = ref('')
-const columnsRef = reactive<Preview>({
-  go_out_dir: "", js_out_dir: "", package_prefix: "",
-  table_name: '',
-  struct_name: '',
-  fields: [],
-  file_name: '',
-  comment: '',
-  module: '',
-  ch_name: ''
-
-})
-const showCodeRef = ref(false)
-const previewCodeRef = ref<PreviewRes>()
-
-
-async function initData() {
-  tablesRef.value = await getTables()
-  console.log(tablesRef.value);
-
-}
-
-initData()
-
-async function loadTableColumns() {
-  const tableColumns = await getTableColumns(selectTableRef.value)
-  columnsRef.table_name = tableColumns.table_name
-  columnsRef.fields = tableColumns.fields
-  columnsRef.module = tableColumns.module
-  columnsRef.struct_name = tableColumns.struct_name
-  columnsRef.file_name = tableColumns.file_name
-  columnsRef.comment = tableColumns.comment
-  columnsRef.ch_name = tableColumns.ch_name
-}
-
-async function preview() {
-
-  columnsRef.go_out_dir = localStorage.getItem(`go_target`)!!
-  columnsRef.package_prefix = localStorage.getItem(`package_prefix`)!!
-
-
-  const code = await previewCode(columnsRef)
-
-  console.log(code)
-  showCodeRef.value = !showCodeRef.value;
-  previewCodeRef.value = code
-
-}
-
-async function download() {
-  await downloadCode(columnsRef)
-}
-
-</script>
-
 <template>
 
   <el-form
@@ -175,5 +108,84 @@ async function download() {
   <el-button @click="preview">预览</el-button>
   <el-button @click="download">下载</el-button>
 </template>
+
+<script setup lang="ts">
+import {downloadCode, getTableColumns, getTables, Preview, previewCode, PreviewRes, TableRes} from '@/api/module/auto';
+import {reactive, ref} from 'vue';
+import 'highlight.js/styles/stackoverflow-light.css'
+import 'highlight.js/lib/common';
+
+import hljsVuePlugin from "@highlightjs/vue-plugin";
+import {ElNotification} from "element-plus";
+
+
+const searchOpt = ["=", "like", "between"]
+
+const tablesRef = ref<TableRes[]>()
+const selectTableRef = ref('')
+const columnsRef = reactive<Preview>({
+  router_path: "",
+  go_out_dir: "", js_out_dir: "", package_prefix: "",
+  table_name: '',
+  struct_name: '',
+  fields: [],
+  file_name: '',
+  comment: '',
+  module: '',
+  ch_name: ''
+})
+const showCodeRef = ref(false)
+const previewCodeRef = ref<PreviewRes>()
+
+async function initData() {
+  tablesRef.value = await getTables()
+  console.log(tablesRef.value);
+
+}
+
+initData()
+
+async function loadTableColumns() {
+  const tableColumns = await getTableColumns(selectTableRef.value)
+  columnsRef.table_name = tableColumns.table_name
+  columnsRef.fields = tableColumns.fields
+  columnsRef.module = tableColumns.module
+  columnsRef.struct_name = tableColumns.struct_name
+  columnsRef.file_name = tableColumns.file_name
+  columnsRef.comment = tableColumns.comment
+  columnsRef.ch_name = tableColumns.ch_name
+}
+
+async function preview() {
+
+  columnsRef.go_out_dir = localStorage.getItem(`go_target`)!!
+  columnsRef.package_prefix = localStorage.getItem(`package_prefix`)!!
+
+
+  const code = await previewCode(columnsRef)
+
+  console.log(code)
+  showCodeRef.value = !showCodeRef.value;
+  previewCodeRef.value = code
+
+}
+
+async function download() {
+  try {
+    await downloadCode(columnsRef)
+  } catch (e) {
+
+  }
+  ElNotification({
+    title: '通知',
+    message: "下载成功!",
+    duration: 2000,
+  })
+
+
+}
+
+</script>
+
 
 <style scoped></style>
