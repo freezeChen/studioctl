@@ -1,0 +1,56 @@
+import service from '@/utils/request'
+
+// 创建{{.TableZhName}}
+export const create{{.StructName}}=(data)=>{
+    return service({
+     uri: '{{- if .Module}}/{{.Module}}{{- end}}/{{.DownLatterStructName}}/create{{.StructName}}',
+     method: 'post',
+     data
+    })
+}
+
+
+// 修改{{.TableZhName}}
+export const update{{.StructName}}=(data)=>{
+return service({
+uri: '{{- if .Module}}/{{.Module}}{{- end}}/{{.DownLatterStructName}}/update{{.StructName}}',
+method: 'put',
+data
+})
+}
+
+// 删除{{.TableZhName}}
+export const delete{{.StructName}}=(params)=>{
+return service({
+uri: '{{- if .Module}}/{{.Module}}{{- end}}/{{.DownLatterStructName}}/delete{{.StructName}}',
+method: 'delete',
+params
+})
+}
+
+// 批量删除{{.TableZhName}}
+export const delete{{.StructName}}ByIds=(params)=>{
+return service({
+uri: '{{- if .Module}}/{{.Module}}{{- end}}/{{.DownLatterStructName}}/delete{{.StructName}}ByIds',
+method: 'delete',
+params
+})
+}
+
+
+export const get{{.StructName}} = (params) => {
+return service({
+uri: '{{- if .Module}}/{{.Module}}{{- end}}/{{.DownLatterStructName}}/get{{.StructName}}',
+method: 'post',
+params
+})
+}
+
+// 分页获取{{.TableZhName}}列表
+export const get{{.StructName}}List = (params) => {
+return service({
+uri: '{{- if .Module}}/{{.Module}}{{- end}}/{{.DownLatterStructName}}/get{{.StructName}}List',
+method: 'get',
+params
+})
+}

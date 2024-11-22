@@ -301,11 +301,233 @@ func (rest {{.StructName}}Rest) get{{.StructName}}List(ctx *gin.Context) {
 
 `)
 
-var tpl_web_api = `
+var tpl_web_api = `import service from '@/utils/request'
+
+// 创建{{.TableZhName}}
+export const create{{.StructName}}=(data)=>{
+    return service({
+     url: '{{- if .Module}}/{{.Module}}{{- end}}/{{.DownLatterStructName}}/create{{.StructName}}',
+     method: 'post',
+     data
+    })
+}
+
+
+// 修改{{.TableZhName}}
+export const update{{.StructName}}=(data)=>{
+	return service({
+	 url: '{{- if .Module}}/{{.Module}}{{- end}}/{{.DownLatterStructName}}/update{{.StructName}}',
+	 method: 'put',
+	 data
+	})
+}
+
+// 删除{{.TableZhName}}
+export const delete{{.StructName}}=(params)=>{
+	return service({
+	 url: '{{- if .Module}}/{{.Module}}{{- end}}/{{.DownLatterStructName}}/delete{{.StructName}}',
+	 method: 'delete',
+	 params
+	})
+}
+
+// 批量删除{{.TableZhName}}
+export const delete{{.StructName}}ByIds=(params)=>{
+ 	return service({
+	 url: '{{- if .Module}}/{{.Module}}{{- end}}/{{.DownLatterStructName}}/delete{{.StructName}}ByIds',
+	 method: 'delete',
+	 params
+	})
+}
+
+
+export const get{{.StructName}} = (params) => {
+	return service({
+	 url: '{{- if .Module}}/{{.Module}}{{- end}}/{{.DownLatterStructName}}/get{{.StructName}}',
+	 method: 'post',
+	 params
+})
+}
+
+// 分页获取{{.TableZhName}}列表
+export const get{{.StructName}}List = (params) => {
+	return service({
+	 url: '{{- if .Module}}/{{.Module}}{{- end}}/{{.DownLatterStructName}}/get{{.StructName}}List',
+	 method: 'get',
+	 params
+})
+}
+
 
 
 `
 
-var tpl_web_form = ``
+var tpl_web_form = `<template>
+    <div>
+        <div class="gva-form-box">
+            <el-form :model="formData" ref="elFormRef" label-position="right" :rules="rule" label-width="80px">
+                {{- range .Columns}}
+                    <el-form-item label="{{.ZhName}}:" prop="{{.JsonName}}">
+                        {{- if .Show}}
+                            {{- if eq .Type "bool"}}
+                                <el-switch v-model="formData.{{.JsonName}}" active-color="#13ce66"
+                                           inactive-color="#ff4949"
+                                           active-text="是" inactive-text="否" clearable></el-switch>
+                            {{- end}}
+                            {{- if eq .Type "string"}}
+                                <el-input v-model="formData.{{.JsonName}}"
+                                          placeholder="请输入{{.ZhName}}"></el-input>
+                            {{- end}}
+                            {{- if eq .Type "int" }}
+                                <el-input v-model.number="formData.{{ .JsonName }}"
+                                          placeholder="请输入{{.ZhName}}"/>
+                            {{- end }}
+                            {{- if eq .Type "jsontime.JsonTime" }}
+                     <el-date-picker v-model="formData.{{ .JsonName }}" type="date" placeholder="选择日期""></el-date-picker>
+                            {{- end }}
+                        {{- end}}
+                    </el-form-item>
+                {{- end}}
+                <el-form-item>
+                    <el-button type="primary" @click="save">保存</el-button>
+                    <el-button type="primary" @click="back">返回</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
 
-var tpl_web_view = ``
+    </div>
+</template>
+
+<script setup>
+    import {
+        create{{.StructName}},
+        update{{.StructName}},
+        find{{.StructName}}
+    } from '@/plugin/{{.Module}}/api/{{.StructName}}'
+
+    defineOptions({
+        name: '{{.StructName}}Form'
+    })
+
+    // 自动获取字典
+    import {getDictFunc} from '@/utils/format'
+    import {useRoute, useRouter} from "vue-router"
+    import {ElMessage} from 'element-plus'
+    import {ref, reactive} from 'vue'
+
+    const route = useRoute()
+    const router = useRouter()
+
+    const type = ref('')
+
+    const formData = ref({
+{{- range  .Columns}}
+   
+        {{- if eq .Type "bool"}}
+        {{.JsonName}}: false,
+        {{- end}}
+        {{- if eq .Type "string"}}
+        {{.JsonName}}: '',
+        {{- end}}
+        {{- if eq .Type "int32"}}
+        {{.JsonName}}: 0,
+        {{- end}}
+        {{- if eq .Type "int64"}}
+        {{.JsonName}}: 0,
+        {{- end}}
+        {{- if eq .Type "float32"}}
+        {{.JsonName}}: 0,
+        {{- end}}
+        {{- if eq .Type "jsontime.JsonTime"}}
+        {{.JsonName}}: new Date(),
+        {{- end}}
+
+{{- end}}
+    })
+    
+// 验证规则
+const rule = reactive({
+    {{- range .Columns}}
+    {{- if eq .Require true}}
+    {{.JsonName}} : [{
+        required: true,
+        message: '不能为空',
+        trigger: ['input','blur'],
+    }],
+    {{- end}}
+      {{- end}}
+})
+    
+const elFormRef = ref()
+
+    // 初始化方法
+const init = async () => {
+    // 建议通过url传参获取目标数据ID 调用 find方法进行查询数据操作 从而决定本页面是create还是update 以下为id作为url参数示例
+    if (route.query.id) {
+        const res = await get{{.StructName}}({ ID: route.query.id })
+        if (res.code === 0) {
+            formData.value = res.data
+            type.value = 'update'
+        }
+    } else {
+        type.value = 'create'
+    }
+
+}
+
+init()
+
+const save = async () => {
+        elFormRef.value?.validate( async (valid) => {
+            if (!valid) return
+            let res
+            switch (type.value) {
+                case 'create':
+                    res = await create{{.StructName}}(formData.value)
+                    break
+                case 'update':
+                    res = await update{{.StructName}}(formData.value)
+                    break
+                default:
+                    res = await create{{.StructName}}(formData.value)
+                    break
+            }
+            if (res.code === 0){
+                ElMessage({
+                    message: '创建/保存成功',
+                    type: 'success',
+                })
+
+        }
+        })
+}
+
+const back = () => {
+    router.go(-1)
+}
+
+    
+
+
+</script>
+
+<style >
+</style>`
+
+var tpl_web_view = `<template>
+    <div>
+        <div class="gva-search-box">
+            <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRule" @keyup.enter="onSubmit">
+                {{- range .Columns}}
+                <el-form-item label="{{.ZhName}}" prop="{{.JsonName}}">
+                    {{- if eq .Type "float64" "int"}}
+                        {{if eq .SearchType "between"}}
+                            
+                            {{end}}
+                        {{- end}}
+                {{- end}}
+            </el-form>
+        </div>
+    </div>
+</template>
+`

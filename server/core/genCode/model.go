@@ -77,8 +77,11 @@ type ColumnMapper struct {
 	Name       string
 	MapperName string
 	ZhName     string
+	JsonName   string
 	Type       string
 	Comment    string
+	Show       bool
+	Require    bool
 	IsKey      bool
 	IsAuto     bool
 	SearchType string

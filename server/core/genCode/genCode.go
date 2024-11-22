@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/freezeChen/studioctl/core/util"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/urfave/cli"
 	template2 "html/template"
 	"path"
@@ -107,11 +108,14 @@ func getTableMapper(in PreviewReq) TableMapper {
 			Name:       field.FieldJson,
 			MapperName: field.FieldName,
 			ZhName:     field.FieldZhName,
+			JsonName:   util.FirstLower(util.PascalCase(field.FieldJson)),
 			Type:       field.FieldType,
 			Comment:    field.FieldComment,
 			IsAuto:     field.IsAuto,
 			SearchType: field.SearchType,
 			IsKey:      field.IsKey,
+			Show:       field.Show,
+			Require:    field.Require,
 			Tag:        template2.HTML(fmt.Sprintf("`json:\"%s\"`", field.FieldJson)),
 		}
 
@@ -135,6 +139,10 @@ func getTableMapper(in PreviewReq) TableMapper {
 }
 
 func genCode(in TableMapper) (*CodeInfo, error) {
+
+	toString, _ := jsoniter.MarshalToString(in)
+	println(toString)
+
 	var out = new(CodeInfo)
 	model, err := genModel(in)
 	if err != nil {
@@ -189,6 +197,26 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		Code:     rest,
 	})
 
+	webApi, err := genWebApi(in)
+	if err != nil {
+		return nil, err
+	}
+	out.Codes = append(out.Codes, CodeItem{
+		FileName: in.StructName + "api.js",
+		Path:     fmt.Sprintf("internal/%s", in.RestPackage),
+		Code:     webApi,
+	})
+
+	webForm, err := genWebForm(in)
+	if err != nil {
+		return nil, err
+	}
+	out.Codes = append(out.Codes, CodeItem{
+		FileName: in.StructName + "form.js",
+		Path:     fmt.Sprintf("internal/%s", in.RestPackage),
+		Code:     webForm,
+	})
+
 	return out, nil
 }
 
@@ -207,7 +235,6 @@ func genReq(in TableMapper) (string, error) {
 }
 
 func genRepo(in TableMapper) (string, error) {
-	fmt.Println(tpl_Repo)
 	parse, _ := template.New("genRepo").Parse(tpl_Repo)
 	var b = bytes.Buffer{}
 	parse.Execute(&b, in)
@@ -228,6 +255,28 @@ func genService(in TableMapper) (string, error) {
 
 func genRest(in TableMapper) (string, error) {
 	parse, err := template.New("genRest").Parse(tpl_api)
+	if err != nil {
+		return "", err
+	}
+	var b = bytes.Buffer{}
+
+	parse.Execute(&b, in)
+	return b.String(), nil
+}
+
+func genWebApi(in TableMapper) (string, error) {
+	parse, err := template.New("genRest").Parse(tpl_web_api)
+	if err != nil {
+		return "", err
+	}
+	var b = bytes.Buffer{}
+
+	parse.Execute(&b, in)
+	return b.String(), nil
+}
+
+func genWebForm(in TableMapper) (string, error) {
+	parse, err := template.New("genRest").Parse(tpl_web_form)
 	if err != nil {
 		return "", err
 	}
