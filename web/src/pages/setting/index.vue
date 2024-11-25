@@ -6,6 +6,9 @@
     <el-form-item label="路径前缀">
       <el-input v-model="settingRef.target"/>
     </el-form-item>
+        <el-form-item label="前端路径前缀">
+          <el-input v-model="settingRef.web_target"/>
+        </el-form-item>
 
   </el-form>
   <el-button @click="load">加载</el-button>
@@ -19,6 +22,7 @@ import {loadGoInfo} from "@/api/module/setting";
 
 const settingRef = reactive({
   target: '',
+  web_target:'',
   package_prefix: ''
 })
 
@@ -30,12 +34,14 @@ async function load() {
 
 function init() {
   settingRef.target = localStorage.getItem("go_target")!!
+  settingRef.web_target = localStorage.getItem("web_target")!!
   settingRef.package_prefix = localStorage.getItem("package_prefix")!!
 }
 
 function save() {
   localStorage.setItem("package_prefix", settingRef.package_prefix)
   localStorage.setItem("go_target", settingRef.target)
+  localStorage.setItem("web_target", settingRef.web_target)
 }
 
 </script>

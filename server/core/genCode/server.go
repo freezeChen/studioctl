@@ -76,13 +76,24 @@ func download(ctx *gin.Context) {
 
 	for _, v := range code.Codes {
 		fmt.Println(path.Join(".", v.Path, v.FileName))
-		os.MkdirAll(param.GoOutDir+"/"+path.Join(".", v.Path), os.ModePerm)
-		file, err := os.Create(param.GoOutDir + "/" + path.Join(".", v.Path, v.FileName))
-		if err != nil {
-			fmt.Println("文件生成失败", err.Error())
+		if v.Type == 1 {
+			os.MkdirAll(param.GoOutDir+"/"+path.Join(".", v.Path), os.ModePerm)
+			file, err := os.Create(param.GoOutDir + "/" + path.Join(".", v.Path, v.FileName))
+			if err != nil {
+				fmt.Println("文件生成失败", err.Error())
+			}
+			file.WriteString(v.Code)
+			file.Close()
+		} else {
+			os.MkdirAll(param.JsOutDir+"/"+path.Join(".", v.Path), os.ModePerm)
+			file, err := os.Create(param.JsOutDir + "/" + path.Join(".", v.Path, v.FileName))
+			if err != nil {
+				fmt.Println("文件生成失败", err.Error())
+			}
+			file.WriteString(v.Code)
+			file.Close()
 		}
-		file.WriteString(v.Code)
-		file.Close()
+
 	}
 
 	xresult.OK(ctx, nil, nil)

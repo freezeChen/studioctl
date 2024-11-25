@@ -135,4 +135,5 @@ type CodeItem struct {
 	FileName string `json:"file_name"` //文件名称
 	Path     string `json:"path"`      //保存路径
 	Code     string `json:"code"`      //代码
+	Type     int32  `json:"type"`      //1:go 2:vue
 }

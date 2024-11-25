@@ -153,6 +153,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		FileName: in.StructName + ".go",
 		Path:     fmt.Sprintf("internal/%s", in.ModelPackage),
 		Code:     model,
+		Type:     1,
 	})
 
 	req, err := genReq(in)
@@ -164,6 +165,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		FileName: in.StructName + "Req.go",
 		Path:     fmt.Sprintf("internal/%s", in.RequestPackage),
 		Code:     req,
+		Type:     1,
 	})
 
 	repo, err := genRepo(in)
@@ -175,6 +177,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		FileName: in.StructName + "Repo.go",
 		Path:     fmt.Sprintf("internal/%s", in.DaoPackage),
 		Code:     repo,
+		Type:     1,
 	})
 
 	svc, err := genService(in)
@@ -185,6 +188,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		FileName: in.StructName + "Service.go",
 		Path:     fmt.Sprintf("internal/%s", in.ServicePackage),
 		Code:     svc,
+		Type:     1,
 	})
 
 	rest, err := genRest(in)
@@ -195,6 +199,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		FileName: in.StructName + "Rest.go",
 		Path:     fmt.Sprintf("internal/%s", in.RestPackage),
 		Code:     rest,
+		Type:     1,
 	})
 
 	webApi, err := genWebApi(in)
@@ -202,9 +207,10 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		return nil, err
 	}
 	out.Codes = append(out.Codes, CodeItem{
-		FileName: in.StructName + "api.js",
-		Path:     fmt.Sprintf("internal/%s", in.RestPackage),
+		FileName: in.DownLatterStructName + ".js",
+		Path:     fmt.Sprintf(path.Join("src/api", in.Module)),
 		Code:     webApi,
+		Type:     2,
 	})
 
 	webForm, err := genWebForm(in)
@@ -212,9 +218,20 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		return nil, err
 	}
 	out.Codes = append(out.Codes, CodeItem{
-		FileName: in.StructName + "form.js",
-		Path:     fmt.Sprintf("internal/%s", in.RestPackage),
+		FileName: in.StructName + "form.vue",
+		Path:     fmt.Sprintf(path.Join("src/view", in.Module, in.DownLatterStructName)),
 		Code:     webForm,
+		Type:     2,
+	})
+	web, err := genWeb(in)
+	if err != nil {
+		return nil, err
+	}
+	out.Codes = append(out.Codes, CodeItem{
+		FileName: in.StructName + "web.vue",
+		Path:     fmt.Sprintf(path.Join("src/view", in.Module, in.DownLatterStructName)),
+		Code:     web,
+		Type:     2,
 	})
 
 	return out, nil
@@ -277,6 +294,17 @@ func genWebApi(in TableMapper) (string, error) {
 
 func genWebForm(in TableMapper) (string, error) {
 	parse, err := template.New("genRest").Parse(tpl_web_form)
+	if err != nil {
+		return "", err
+	}
+	var b = bytes.Buffer{}
+
+	parse.Execute(&b, in)
+	return b.String(), nil
+}
+
+func genWeb(in TableMapper) (string, error) {
+	parse, err := template.New("genRest").Parse(tpl_web_view)
 	if err != nil {
 		return "", err
 	}

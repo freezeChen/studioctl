@@ -160,7 +160,7 @@ async function preview() {
 
   columnsRef.go_out_dir = localStorage.getItem(`go_target`)!!
   columnsRef.package_prefix = localStorage.getItem(`package_prefix`)!!
-
+  columnsRef.js_out_dir =  localStorage.getItem(`web_target`)!!
 
   const code = await previewCode(columnsRef)
 
@@ -172,6 +172,9 @@ async function preview() {
 
 async function download() {
   try {
+    columnsRef.go_out_dir = localStorage.getItem(`go_target`)!!
+    columnsRef.package_prefix = localStorage.getItem(`package_prefix`)!!
+    columnsRef.js_out_dir =  localStorage.getItem(`web_target`)!!
     await downloadCode(columnsRef)
   } catch (e) {
 
