@@ -18,6 +18,7 @@
 # vendor/
 node_modules
 .idea
+/server/core/genCode/dist
 
 # Go workspace file
 go.work

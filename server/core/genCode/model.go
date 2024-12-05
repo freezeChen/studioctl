@@ -19,16 +19,17 @@ type TableInfoRs struct {
 }
 
 type PreviewReq struct {
-	TableName     string         `json:"table_name,omitempty"`  //表名
-	StructName    string         `json:"struct_name,omitempty"` //实体名称
-	FileName      string         `json:"file_name,omitempty"`   //文件名称
-	Comment       string         `json:"comment"`               //表注释
-	Module        string         `json:"module,omitempty"`      //模块(具体为创建一级目录)
-	ChName        string         `json:"ch_name"`               //中文名称(用于备注提示)
-	GoOutDir      string         `json:"go_out_dir"`            //go代码输出路径
-	JsOutDir      string         `json:"js_out_dir"`            //js代码输出路径
-	PackagePrefix string         `json:"package_prefix"`        //go包前缀
-	RouterPath    string         `json:"router_path"`           //路由包路径
+	TableName  string `json:"table_name,omitempty"`  //表名
+	StructName string `json:"struct_name,omitempty"` //实体名称
+	FileName   string `json:"file_name,omitempty"`   //文件名称
+
+	Comment       string         `json:"comment"`          //表注释
+	Module        string         `json:"module,omitempty"` //模块(具体为创建一级目录)
+	ChName        string         `json:"ch_name"`          //中文名称(用于备注提示)
+	GoOutDir      string         `json:"go_out_dir"`       //go代码输出路径
+	JsOutDir      string         `json:"js_out_dir"`       //js代码输出路径
+	PackagePrefix string         `json:"package_prefix"`   //go包前缀
+	RouterPath    string         `json:"router_path"`      //路由包路径
 	Fields        []PreviewField `json:"fields,omitempty"`
 }
 
@@ -38,11 +39,12 @@ type PreviewField struct {
 	FieldComment string `json:"field_comment,omitempty"` //字段备注
 	FieldType    string `json:"field_type,omitempty"`    //字段类型
 	FieldJson    string `json:"field_json,omitempty"`    //jsonTag
-	Show         bool   `json:"show"`                    //是否显示
-	Require      bool   `json:"require,omitempty"`       //是否必填(编辑)
-	SearchType   string `json:"search_type,omitempty"`   //搜索条件(=,like,between)
-	IsKey        bool   `json:"is_key"`                  //是否主键
-	IsAuto       bool   `json:"is_auto"`                 //是否自增
+	DictType     string `json:"dict_type,omitempty"`
+	Show         bool   `json:"show"`                  //是否显示
+	Require      bool   `json:"require,omitempty"`     //是否必填(编辑)
+	SearchType   string `json:"search_type,omitempty"` //搜索条件(=,like,between)
+	IsKey        bool   `json:"is_key"`                //是否主键
+	IsAuto       bool   `json:"is_auto"`               //是否自增
 }
 
 type TableMapper struct {
@@ -79,6 +81,7 @@ type ColumnMapper struct {
 	ZhName     string
 	JsonName   string
 	Type       string
+	DictType   string
 	Comment    string
 	Show       bool
 	Require    bool
@@ -136,4 +139,9 @@ type CodeItem struct {
 	Path     string `json:"path"`      //保存路径
 	Code     string `json:"code"`      //代码
 	Type     int32  `json:"type"`      //1:go 2:vue
+}
+
+type DictInfo struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
 }

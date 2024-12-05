@@ -12,6 +12,7 @@ type Query interface {
 	Tables() ([]Table, error)
 	GetTableInfo(table string) (Table, error)
 	TableColumn(table string) ([]Column, error)
+	GetDictList() ([]DictInfo, error)
 }
 
 func initDb(source string) *gorm.DB {
@@ -90,4 +91,10 @@ func (m *MysqlQuery) TableColumn(table string) ([]Column, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+func (m *MysqlQuery) GetDictList() ([]DictInfo, error) {
+	var out = make([]DictInfo, 0)
+	err := m.db.Raw("select name,type from sys_dictionaries where deleted_at IS NULL and status=1").Scan(&out).Error
+	return out, err
 }

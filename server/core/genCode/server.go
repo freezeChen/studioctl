@@ -1,15 +1,21 @@
 package genCode
 
 import (
+	"embed"
 	"fmt"
 	"github.com/freezeChen/studioctl/core/util"
 	"github.com/freezeChen/studioctl/core/xresult"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"io/fs"
+	"net/http"
 	"os"
 	"path"
 	"strings"
 )
+
+//go:embed dist/*
+var webFiles embed.FS
 
 func NewServer(port string) {
 	engine := gin.Default()
@@ -18,12 +24,22 @@ func NewServer(port string) {
 
 	engine.Use(cors.New(config))
 
+	distFs, _ := fs.Sub(webFiles, "dist")
+	filerServer := http.FS(distFs)
+
+	engine.StaticFS("/static", filerServer)
+
+	//engine.NoRoute(func(c *gin.Context) {
+	//	c.FileFromFS("index.html", filerServer)
+	//})
+
 	engine.GET("gen/tables", tables)
 	engine.GET("gen/columns", tableColumns)
 	engine.POST("gen/preview", preview)
 	engine.POST("gen/download", download)
 
 	engine.GET("setting/loadGoInfo", loadTarget)
+	engine.GET("getDictList", getDictList)
 
 	engine.Run(port)
 }
@@ -98,6 +114,11 @@ func download(ctx *gin.Context) {
 
 	xresult.OK(ctx, nil, nil)
 
+}
+
+func getDictList(ctx *gin.Context) {
+	list, err := query.GetDictList()
+	xresult.OK(ctx, list, err)
 }
 
 //endregion

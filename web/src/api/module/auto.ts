@@ -26,7 +26,7 @@ export interface Preview {
     go_out_dir: string; //go代码输出路径
     js_out_dir: string; //前端代码输出路径
     package_prefix: string; //go 包前缀
-    router_path:string;
+    router_path: string;
     fields: Array<PreviewField>;
 }
 
@@ -38,6 +38,7 @@ export interface PreviewField {
     field_json: string; //字段json(sql字段)
     require: boolean; //是否必须
     search_type: string; ////搜索条件(=,like,between)
+    dict_type: string;
     is_key: boolean;
     is_auto: boolean;
 }
@@ -52,6 +53,11 @@ export interface CodeItem {
     file_name: string;
     path: string;
     code: string;
+}
+
+export interface DictInfo {
+    name: string;
+    type: string;
 }
 
 
@@ -73,4 +79,8 @@ export async function previewCode(params: Preview): Promise<PreviewRes> {
 
 export async function downloadCode(params: Preview): Promise<any> {
     return axiosInstance.post("gen/download", params)
+}
+
+export async function getDictList(): Promise<DictInfo[]>{
+    return axiosInstance.get("getDictList")
 }

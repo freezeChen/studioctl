@@ -92,6 +92,13 @@
         </el-select>
       </template>
     </el-table-column>
+    <el-table-column prop="dist_type" label="字典类型" min-width="120">
+      <template #default="scope">
+        <el-select v-model="scope.row.dict_type" clearable>
+          <el-option v-for="s in dictOpt" :label="s.name" :value="s.type"/>
+        </el-select>
+      </template>
+    </el-table-column>
 
   </el-table>
 
@@ -110,7 +117,16 @@
 </template>
 
 <script setup lang="ts">
-import {downloadCode, getTableColumns, getTables, Preview, previewCode, PreviewRes, TableRes} from '@/api/module/auto';
+import {
+  downloadCode,
+  getDictList,
+  getTableColumns,
+  getTables,
+  Preview,
+  previewCode,
+  PreviewRes,
+  TableRes
+} from '@/api/module/auto';
 import {reactive, ref} from 'vue';
 import 'highlight.js/styles/stackoverflow-light.css'
 import 'highlight.js/lib/common';
@@ -120,6 +136,8 @@ import {ElNotification} from "element-plus";
 
 
 const searchOpt = ["=", "like", "between"]
+
+let dictOpt
 
 const tablesRef = ref<TableRes[]>()
 const selectTableRef = ref('')
@@ -139,8 +157,7 @@ const previewCodeRef = ref<PreviewRes>()
 
 async function initData() {
   tablesRef.value = await getTables()
-  console.log(tablesRef.value);
-
+  dictOpt = await getDictList()
 }
 
 initData()
@@ -160,7 +177,7 @@ async function preview() {
 
   columnsRef.go_out_dir = localStorage.getItem(`go_target`)!!
   columnsRef.package_prefix = localStorage.getItem(`package_prefix`)!!
-  columnsRef.js_out_dir =  localStorage.getItem(`web_target`)!!
+  columnsRef.js_out_dir = localStorage.getItem(`web_target`)!!
 
   const code = await previewCode(columnsRef)
 
@@ -174,7 +191,7 @@ async function download() {
   try {
     columnsRef.go_out_dir = localStorage.getItem(`go_target`)!!
     columnsRef.package_prefix = localStorage.getItem(`package_prefix`)!!
-    columnsRef.js_out_dir =  localStorage.getItem(`web_target`)!!
+    columnsRef.js_out_dir = localStorage.getItem(`web_target`)!!
     await downloadCode(columnsRef)
   } catch (e) {
 

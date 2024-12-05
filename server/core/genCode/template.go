@@ -527,32 +527,35 @@ var tpl_web_view = `<template>
                                     <span>
                                         {{.JsonName}}
                                         <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
-                                        <el-icon><QuestionFilled /></el-icon>
+                                        <el-icon><QuestionFilled/></el-icon>
                                         </el-tooltip>
                                     </span>
                                 </template>
-                                <el-date-picker v-model="searchInfo.start{{.JsonName}}" type="datetime" placeholder="开始日期" :disabled-date="time=> searchInfo.end{{.JsonName}} ? time.getTime() > searchInfo.end{{.JsonName}}.getTime() : false"></el-date-picker>
+                                <el-date-picker v-model="searchInfo.start{{.JsonName}}" type="datetime"
+                                                placeholder="开始日期"
+                                                :disabled-date="time=> searchInfo.end{{.JsonName}} ? time.getTime() > searchInfo.end{{.JsonName}}.getTime() : false"></el-date-picker>
                                 —
-                                <el-date-picker v-model="searchInfo.end{{.JsonName}}" type="datetime" placeholder="结束日期" :disabled-date="time=> searchInfo.start{{.JsonName}} ? time.getTime() < searchInfo.start{{.JsonName}}.getTime() : false"></el-date-picker>
+                                <el-date-picker v-model="searchInfo.end{{.JsonName}}" type="datetime"
+                                                placeholder="结束日期"
+                                                :disabled-date="time=> searchInfo.start{{.JsonName}} ? time.getTime() < searchInfo.start{{.JsonName}}.getTime() : false"></el-date-picker>
                             </el-form-item>
                         {{- end}}
                     {{- else if eq .SearchType "like" "=" }}
-                    <el-form-item label="{{.ZhName}}" prop="{{.JsonName}}">
-                        <el-input v-model="searchInfo.{{.JsonName}}"></el-input>
-                    </el-form-item>
+                        <el-form-item label="{{.ZhName}}" prop="{{.JsonName}}">
+                            <el-input v-model="searchInfo.{{.JsonName}}"></el-input>
+                        </el-form-item>
                     {{- end}}
                 {{- end}}
-                
-   
-                    <el-form-item>
-                        <el-button type="primary" icon="search" @click="onSubmit">查询</el-button>
-                        <el-button icon="refresh" @click="onReset">重置</el-button>
-                        <el-button link type="primary" icon="arrow-down" @click="showAllQuery=true"
-                                   v-if="!showAllQuery">展开
-                        </el-button>
-                        <el-button link type="primary" icon="arrow-up" @click="showAllQuery=false" v-else>收起
-                        </el-button>
-                    </el-form-item>
+
+                <el-form-item>
+                    <el-button type="primary" icon="search" @click="onSubmit">查询</el-button>
+                    <el-button icon="refresh" @click="onReset">重置</el-button>
+                    <el-button link type="primary" icon="arrow-down" @click="showAllQuery=true"
+                               v-if="!showAllQuery">展开
+                    </el-button>
+                    <el-button link type="primary" icon="arrow-up" @click="showAllQuery=false" v-else>收起
+                    </el-button>
+                </el-form-item>
             </el-form>
         </div>
 
@@ -573,7 +576,18 @@ var tpl_web_view = `<template>
             >
                 <el-table-column type="selection" width="55"/>
                 {{- range .Columns}}
-                    <el-table-column align="left" label="{{.ZhName}}" prop="{{.JsonName}}" width="120"/>
+                    {{- if .Show}}
+                        {{- if .DictType}}
+                        <el-table-column align="left" label="{{.ZhName}}" prop="{{.JsonName}}" width="120">
+                            <template #default="scope">
+                                {{"{{"}} filterDict(scope.row.{{.JsonName}},{{.DictType}}Options) {{"}}"}}
+                            </template>
+                        </el-table-column>
+                        {{- else}}
+                        <el-table-column align="left" label="{{.ZhName}}" prop="{{.JsonName}}" width="120"/>
+                        {{- end}}
+
+                    {{- end}}
                 {{- end}}
                 <el-table-column align="left" label="操作" fixed="right" min-width="240">
                     <template #default="scope">
@@ -604,7 +618,8 @@ var tpl_web_view = `<template>
             </div>
         </div>
 
-        <el-drawer destroy-on-close size="800" v-model="dialogFormVisible" :show-close="false" :before-close="closeDialog">
+        <el-drawer destroy-on-close size="800" v-model="dialogFormVisible" :show-close="false"
+                   :before-close="closeDialog">
             <template #header>
                 <div class="flex justify-between items-center">
                     <span class="text-lg">{{"{{"}}type==='create'?'新增':'编辑'{{"}}"}}</span>
@@ -618,26 +633,27 @@ var tpl_web_view = `<template>
             <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
 
                 {{- range .Columns}}
-                <el-form-item label="{{.ZhName}}:" prop="{{.JsonName}}">
-                    {{- if .Show}}
-                    {{- if eq .Type "bool"}}
-                    <el-switch v-model="formData.{{.JsonName}}" active-color="#13ce66"
-                               inactive-color="#ff4949"
-                               active-text="是" inactive-text="否" clearable></el-switch>
-                    {{- end}}
-                    {{- if eq .Type "string"}}
-                    <el-input v-model="formData.{{.JsonName}}"
-                              placeholder="请输入{{.ZhName}}"></el-input>
-                    {{- end}}
-                    {{- if eq .Type "int" }}
-                    <el-input v-model.number="formData.{{ .JsonName }}"
-                              placeholder="请输入{{.ZhName}}"/>
-                    {{- end }}
-                    {{- if eq .Type "jsontime.JsonTime" }}
-                    <el-date-picker v-model="formData.{{ .JsonName }}" type="date" placeholder="选择日期"></el-date-picker>
-                    {{- end }}
-                    {{- end}}
-                </el-form-item>
+                    <el-form-item label="{{.ZhName}}:" prop="{{.JsonName}}">
+                        {{- if .Show}}
+                            {{- if eq .Type "bool"}}
+                                <el-switch v-model="formData.{{.JsonName}}" active-color="#13ce66"
+                                           inactive-color="#ff4949"
+                                           active-text="是" inactive-text="否" clearable></el-switch>
+                            {{- end}}
+                            {{- if eq .Type "string"}}
+                                <el-input v-model="formData.{{.JsonName}}"
+                                          placeholder="请输入{{.ZhName}}"></el-input>
+                            {{- end}}
+                            {{- if eq .Type "int" }}
+                                <el-input v-model.number="formData.{{ .JsonName }}"
+                                          placeholder="请输入{{.ZhName}}"/>
+                            {{- end }}
+                            {{- if eq .Type "jsontime.JsonTime" }}
+                                <el-date-picker v-model="formData.{{ .JsonName }}" type="date"
+                                                placeholder="选择日期"></el-date-picker>
+                            {{- end }}
+                        {{- end}}
+                    </el-form-item>
                 {{- end}}
             </el-form>
         </el-drawer>
@@ -653,8 +669,10 @@ var tpl_web_view = `<template>
         get{{.StructName}}List,
         delete{{.StructName}}ByIds,
     } from '@/api/{{.Module}}/{{.DownLatterStructName}}'
+    import {getDictFunc, formatDate, formatBoolean, filterDict} from '@/utils/format'
     import {ElMessage, ElMessageBox} from 'element-plus'
     import {ref, reactive} from 'vue'
+    import {getDictList} from "./auto";
 
     // 提交按钮loading
     const btnLoading = ref(false)
@@ -662,26 +680,39 @@ var tpl_web_view = `<template>
     // 控制更多查询条件显示/隐藏状态
     const showAllQuery = ref(false)
 
+    //字典
+    {{- range .Columns}}
+    {{- if .DictType }}
+    const {{ .DictType }}Options = ref([])
+    {{- end}}
+    {{- end }}
+
     const formData = ref({
     {{- range  .Columns}}
 
     {{- if eq .Type "bool"}}
-    {{.JsonName}}:false,
+    {{.JsonName}}:
+    false,
     {{- end}}
     {{- if eq .Type "string"}}
-    {{.JsonName}}:'',
+    {{.JsonName}}:
+    '',
     {{- end}}
     {{- if eq .Type "int32"}}
-    {{.JsonName}}:0,
+    {{.JsonName}}:
+    0,
     {{- end}}
     {{- if eq .Type "int64"}}
-    {{.JsonName}}:0,
+    {{.JsonName}}:
+    0,
     {{- end}}
     {{- if eq .Type "float32"}}
-    {{.JsonName}}:0,
+    {{.JsonName}}:
+    0,
     {{- end}}
     {{- if eq .Type "jsontime.JsonTime"}}
-    {{.JsonName}}:new Date(),
+    {{.JsonName}}:
+    new Date(),
     {{- end}}
 
     {{- end}}
@@ -764,11 +795,15 @@ var tpl_web_view = `<template>
     getTableData()
     // 获取需要的字典 可能为空 按需保留
     const setOptions = async () => {
+        {{- range .Columns}}
+        {{- if .DictType}}
+        {{.DictType}}Optons.value = await getDictFunc('{{.DictType}}')
+        {{- end}}
+        {{- end}}
     }
 
     // 获取需要的字典 可能为空 按需保留
     setOptions()
-
 
     // 多选数据
     const multipleSelection = ref([])
@@ -834,7 +869,7 @@ var tpl_web_view = `<template>
     }
 
     const delete{{.StructName}}Func = async (row) => {
-        const res = await delete{{.StructName}}({id: row.id})
+        const res = await delete {{.StructName}}({id: row.id})
         if (res.code === 0) {
             ElMessage({
                 type: 'success',
@@ -879,19 +914,21 @@ var tpl_web_view = `<template>
         0,
         {{- end}}
         {{- if eq .Type "float32"}}
-        {{.JsonName}}:0,
+        {{.JsonName}}:
+        0,
         {{- end}}
         {{- if eq .Type "jsontime.JsonTime"}}
-        {{.JsonName}}:new Date(),
+        {{.JsonName}}:
+        new Date(),
         {{- end}}
 
         {{- end}}
-        }
+    }
     }
     // 弹窗确定
     const enterDialog = async () => {
         btnLoading.value = true
-        elFormRef.value?.validate( async (valid) => {
+        elFormRef.value?.validate(async (valid) => {
             if (!valid) return btnLoading.value = false
             let res
             switch (type.value) {
@@ -933,7 +970,7 @@ var tpl_web_view = `<template>
     // 打开详情
     const getDetails = async (row) => {
         // 打开弹窗
-        const res = await get{{.StructName}}({ id: row.id })
+        const res = await get{{.StructName}}({id: row.id})
         if (res.code === 0) {
             detailFrom.value = res.data
             openDetailShow()

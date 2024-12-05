@@ -110,6 +110,7 @@ func getTableMapper(in PreviewReq) TableMapper {
 			ZhName:     field.FieldZhName,
 			JsonName:   util.FirstLower(util.PascalCase(field.FieldJson)),
 			Type:       field.FieldType,
+			DictType:   field.DictType,
 			Comment:    field.FieldComment,
 			IsAuto:     field.IsAuto,
 			SearchType: field.SearchType,
@@ -144,7 +145,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 	println(toString)
 
 	var out = new(CodeInfo)
-	model, err := genModel(in)
+	model, err := gen(in, tpl_model)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +157,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		Type:     1,
 	})
 
-	req, err := genReq(in)
+	req, err := gen(in, tpl_modelReq)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +169,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		Type:     1,
 	})
 
-	repo, err := genRepo(in)
+	repo, err := gen(in, tpl_Repo)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +181,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		Type:     1,
 	})
 
-	svc, err := genService(in)
+	svc, err := gen(in, tpl_service)
 	if err != nil {
 		return nil, err
 	}
@@ -191,7 +192,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		Type:     1,
 	})
 
-	rest, err := genRest(in)
+	rest, err := gen(in, tpl_api)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +203,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		Type:     1,
 	})
 
-	webApi, err := genWebApi(in)
+	webApi, err := gen(in, tpl_web_api)
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +214,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		Type:     2,
 	})
 
-	webForm, err := genWebForm(in)
+	webForm, err := gen(in, tpl_web_form)
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +224,7 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 		Code:     webForm,
 		Type:     2,
 	})
-	web, err := genWeb(in)
+	web, err := gen(in, tpl_web_view)
 	if err != nil {
 		return nil, err
 	}
@@ -235,6 +236,14 @@ func genCode(in TableMapper) (*CodeInfo, error) {
 	})
 
 	return out, nil
+}
+
+func gen(in TableMapper, tpl string) (string, error) {
+	parse, _ := template.New("tpl").Parse(tpl)
+	var b = bytes.Buffer{}
+	parse.Execute(&b, in)
+	return b.String(), nil
+
 }
 
 func genModel(in TableMapper) (string, error) {

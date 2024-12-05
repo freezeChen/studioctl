@@ -15,6 +15,8 @@ export default defineConfig({
             resolvers: [ElementPlusResolver()],
         }),
     ],
+    base:'/static',
+
     resolve: {
         alias: {
             '@': resolve(__dirname, './src')
