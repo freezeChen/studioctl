@@ -10,7 +10,9 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
+	"runtime"
 	"strings"
 )
 
@@ -41,7 +43,26 @@ func NewServer(port string) {
 	engine.GET("setting/loadGoInfo", loadTarget)
 	engine.GET("getDictList", getDictList)
 
+	openBrowser("http://localhost" + port + "/static")
 	engine.Run(port)
+}
+
+func openBrowser(url string) error {
+	var cmd string
+	var args []string
+
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+	default: // Linux 等其他 Unix-like 系统
+		cmd = "xdg-open"
+	}
+
+	args = append(args, url)
+	return exec.Command(cmd, args...).Start()
 }
 
 //region 表信息
